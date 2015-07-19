@@ -1,3 +1,7 @@
+# Torch installation
+deepmind-atari-master/torch/*
+
+
 # Compiled Lua sources
 luac.out
 
