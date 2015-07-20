@@ -76,10 +76,8 @@ function string:split( inSplitPattern, outResults )
 end
 
 function parse_stdin()
-    io.read("*line")
-
     local temp = io.read("*line")
-    if temp == "DIE" then
+    if temp == "DIE\n" then
         return "", -1, -1
     end
 
@@ -92,9 +90,18 @@ function parse_stdin()
     return screen_str, tonumber(episode), tonumber(reward)       
 end
 
+local login = "team_4"
+local password = "CZELol"
+local rom_name = opt.env
+
+print(login .. "," .. password .. "," .. rom_name)
+io.read("*line") --read screen size but not necessary
+print("0,0,0,1")
+
 while true do
     local screen_str, episode, reward = parse_stdin()
     if reward == -1 then
         break
-    print("1,18")  
+    end
+    print("1,18")  --FIRE action
 end

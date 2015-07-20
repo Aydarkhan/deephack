@@ -84,7 +84,7 @@ function nql:__init(args)
             self.network = exp.model
         end
     else
-        print('Creating Agent Network from ' .. self.network)
+        --print('Creating Agent Network from ' .. self.network)
         self.network = err
         self.network = self:network()
     end
