@@ -1,4 +1,4 @@
-ROOT="/home/shrubb/Projects/dqn-in-the-caffe"
+ROOT=`pwd`
 GAME="tutankham"
 ITER="10000"
 
