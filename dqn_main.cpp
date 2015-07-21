@@ -82,19 +82,19 @@ double PlayOneEpisode(
       		if (update) 
       		{
         		// Add the current transition to replay memory
-        		const auto transition = ale.game_over() ? dqn::Transition(input_frames, action, reward, boost::none) :
-            																							dqn::Transition(input_frames,
-																										                action,
-																										                reward,
-																										                dqn::PreprocessScreen(ale.getScreen()));
+        		const auto transition = ale.game_over() ? 
+        		                            dqn::Transition(input_frames, action, reward, boost::none) :
+            								dqn::Transition(input_frames, action, reward, dqn::PreprocessScreen(ale.getScreen()));
         		dqn.AddTransition(transition);
     		    // If the size of replay memory is enough, update DQN
-	        	if (dqn.memory_size() > FLAGS_memory_threshold) {
+	        	if (dqn.memory_size() > FLAGS_memory_threshold) 
+	        	{
 	          		dqn.Update();
 	        	}
       		}
     	}
   	}
+
   	ale.reset_game();
   	return total_score;
 }
