@@ -31,7 +31,7 @@ snapshot: 2500" >> $out_file
 	snapshot_path=$proto_prefix"Snapshot-"$gamename"/"$gamename
 
 	echo "snapshot_prefix: \""$snapshot_path"\"" >> $out_file
-	echo "solver_mode: CPU" >> $out_file
+	#echo "solver_mode: CPU" >> $out_file
 	echo "device_id: "$ind >> $out_file
 	ind=$((ind+1))	      
 done
