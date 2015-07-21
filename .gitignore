@@ -3,3 +3,7 @@
 /Makefile
 /build
 .idea
+CMakeLists.txt
+Net/dqn_gopher_solver.prototxt
+Net/dqn_seaquest_solver.prototxt
+Net/dqn_tutankham_solver.prototxt
