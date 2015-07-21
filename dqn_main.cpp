@@ -78,9 +78,9 @@ double PlayOneEpisode(
 	  		total_score += immediate_score;
 	      	// Rewards for DQN are normalized as follows:
 	      	// 1 for any positive score, -1 for any negative score, otherwise 0
-	      	const auto reward = immediate_score == 0 ? 0 : immediate_score /= std::abs(immediate_score);
-	  		if (update) 
-	  		{
+			const auto reward = immediate_score == 0 ? 0 : immediate_score /= std::abs(immediate_score);
+			if (update) 
+			{
 	    		// Add the current transition to replay memory
 	    		const auto transition = ale.game_over() ? 
 	    		                            dqn::Transition(input_frames, action, reward, boost::none) :
