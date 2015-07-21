@@ -1,4 +1,4 @@
-net: "/home/raian/DeepHackMoscow/deepmind_caffe/Net/dqn.prototxt"
+net: "/home/ruslan/Documents/projects/deephack/deephack/Net/dqn.prototxt"
 solver_type: ADADELTA
 momentum: 0.95
 base_lr: 0.2
@@ -8,6 +8,5 @@ stepsize: 1000000
 max_iter: 2000000
 display: 100
 snapshot: 2500
-snapshot_prefix: "/home/raian/DeepHackMoscow/deepmind_caffe/Net/Snapshot-seaquest/seaquest"
-solver_mode: CPU
+snapshot_prefix: "/home/ruslan/Documents/projects/deephack/deephack/Net/Snapshot-seaquest/seaquest"
 device_id: 2

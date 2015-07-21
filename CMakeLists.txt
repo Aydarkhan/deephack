@@ -5,10 +5,12 @@ option(CPU_ONLY "Use CPU only for Caffe" ON)
 option(USE_CUDNN "Use cuDNN for Caffe" OFF)
 option(USE_SDL "Use SDL for ALE" ON)
 
-include_directories(~/DeepHackMoscow/caffe/include)
-include_directories(~/DeepHackMoscow/Arcade-Learning-Environment/src)
-link_directories(~/DeepHackMoscow/caffe/build/lib)
-link_directories(~/DeepHackMoscow/Arcade-Learning-Environment/)
+include_directories(~/Documents/projects/deephack/caffe-dqn/include)
+include_directories(~/Documents/projects/deephack/Arcade-Learning-Environment/src)
+link_directories(~/Documents/projects/deephack/caffe-dqn/build/lib)
+link_directories(~/Documents/projects/deephack/Arcade-Learning-Environment/)
+link_directories(/usr/local/lib/)
+
 
 #include_directories(/opt/OpenBLAS/include)
 
@@ -16,7 +18,8 @@ if(USE_CUDNN)
   link_directories(~/cudnn-6.5-linux-R1)
 endif()
 
-add_executable(dqn dqn_main.cpp dqn.cpp)
+#add_executable(dqn dqn_main.cpp dqn.cpp)
+add_executable(dqn dqn.cpp dqn_main_gopher_submit.cpp)
 
 set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -std=c++11 -O3 -march=native")
 

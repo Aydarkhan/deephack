@@ -72,7 +72,7 @@ namespace dqn {
         return RGBToGrayscale(PixelToRGB(pixel));
     }
 
-    FrameDataSp PreprocessArrayScreen(const std::vector<std::vector<unsigned char>>& raw_pixels, std::ofstream &out) {
+    FrameDataSp PreprocessArrayScreen(const std::vector<std::vector<unsigned char>>& raw_pixels) {
         /*
         std::cout << std::endl;
         for (int i = 0; i < 6000; ++i) {
@@ -81,10 +81,9 @@ namespace dqn {
         std::cout << std::endl;
          */
 
+
         assert(raw_pixels[0].size() == kRawFrameWidth);
-        // out << "width\n";
         assert(raw_pixels.size() == kRawFrameHeight);
-        // out << "height\n";
         auto screen = std::make_shared<FrameData>();
         assert(kRawFrameHeight > kRawFrameWidth);
         // std::cout << "inequailty\n";

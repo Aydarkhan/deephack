@@ -9,15 +9,15 @@
 
 DEFINE_bool(gpu, false, "Use GPU to brew Caffe");
 DEFINE_bool(gui, false, "Open a GUI window");
-DEFINE_string(rom, "/home/shrubb/Programs/ALE/games/gopher.bin", "Atari 2600 ROM to play");
-DEFINE_string(solver, "/home/shrubb/Projects/dqn-in-the-caffe/Net/dqn_seaquest_solver.prototxt", "Solver parameter file (*.prototxt)");
+DEFINE_string(rom, "../games/gopher.bin", "Atari 2600 ROM to play");
+DEFINE_string(solver, "../Net/dqn_gopher_solver.prototxt", "Solver parameter file (*.prototxt)");
 DEFINE_int32(memory, 500000, "Capacity of replay memory");
 DEFINE_int32(explore, 1000000, "Number of iterations needed for epsilon to reach 0.1");
 DEFINE_double(gamma, 0.95, "Discount factor of future rewards (0,1]");
 DEFINE_int32(memory_threshold, 100, "Enough amount of transitions to start learning");
 DEFINE_int32(skip_frame, 3, "Number of frames skipped");
 DEFINE_bool(show_frame, false, "Show the current frame in CUI");
-DEFINE_string(model, "/home/shrubb/Projects/dqn-in-the-caffe/Net/Snapshot-gopher/gopher_iter_162500.caffemodel", "Model file to load");
+DEFINE_string(model, "../Net/Snapshot-gopher/gopher_iter_247500.caffemodel", "Model file to load");
 DEFINE_bool(evaluate, true, "Evaluation mode: only playing a game, no updates");
 DEFINE_double(evaluate_with_epsilon, 0.05, "Epsilon value to be used in evaluation mode");
 DEFINE_double(repeat_games, 30, "Number of games played in evaluation mode");
@@ -38,6 +38,55 @@ unsigned char hex(char x) {
   }
 }
 
+
+bool read_screen(std::vector<std::vector<unsigned char>> &raw_screen){
+
+  bool term = false;
+  char a, b;
+  char terminate;
+  char reward[10];
+
+  // read screen
+  for (int i = 0; i < 210; ++i) {
+      for (int j = 0; j < 160; ++j) {
+
+          fscanf(stdin, "%c%c", &a, &b);
+          if (b == 'I') { // DIE
+              term = true;
+              break;
+          }
+          raw_screen[i][j] = hex(a) * (unsigned char)16 + hex(b);
+      }
+  }
+
+
+
+  char temp;
+  fscanf(stdin, "%c", &temp); // :
+  fscanf(stdin, "%c", &terminate);
+  fscanf(stdin, "%c", &temp); // :
+  std::cin.get(reward, 9, ':');
+  std::cerr << reward << std::endl;
+  if (terminate == '1') {
+      term = true;
+  }
+  //char temp[70000];
+  //fgets(temp, 69999, stdin);
+  std::cin.ignore(std::numeric_limits<std::streamsize>::max(), '\n');
+
+  return term;
+}
+
+void make_action(ALEInterface ale, Action action){
+      
+      fprintf(stdout, "%d,18\n", action);
+      fflush(stdout);
+
+      if(FLAGS_gui)
+          ale.act(action);
+      return;
+}
+
 int main(int argc, char** argv) {
   /*int test;
   std::ifstream in("/home/shrubb/test.txt");
@@ -46,6 +95,9 @@ int main(int argc, char** argv) {
     std::cout << test << std::endl;
   }
   return 0;*/
+
+    //google::
+        //minloglevel=google::ERROR;
 
   gflags::ParseCommandLineFlags(&argc, &argv, true);
   google::InitGoogleLogging(argv[0]);
@@ -58,16 +110,16 @@ int main(int argc, char** argv) {
     caffe::Caffe::set_mode(caffe::Caffe::CPU);
   }
 
-  freopen("/home/shrubb/Projects/dqn-in-the-caffe/build/simple_in", "r", stdin);
+  //freopen("simple_in", "r", stdin);
 
   fprintf(stdout, "team_4,CZELol,gopher\n");
   fflush(stdout);
-  std::ofstream out("/home/shrubb/test.txt");
+  std::ofstream out("test.txt");
 
   char temp[70000];
   fgets(temp, 69999, stdin);
   out << temp << std::endl;
-  //out.close();
+  out.close();
 
   fprintf(stdout, "0,0,0,1\n");
 
@@ -89,87 +141,57 @@ int main(int argc, char** argv) {
 
   std::deque<dqn::FrameDataSp> past_frames;
   auto total_score = 0.0;
-  for (auto frame = 0; ; ++frame) {
+  dqn::FrameDataSp current_frame;
+  std::vector<std::vector<unsigned char>> raw_screen(210, std::vector<unsigned char>(160));
 
-    std::vector<std::vector<unsigned char>> raw_screen(210, std::vector<unsigned char>(160));
+  bool term;
 
-    // read screen
-    for (int i = 0; i < 210; ++i) {
-      std::cout << i << std::endl;
-      for (int j = 0; j < 160; ++j) {
-
-        char a, b;
-        fscanf(stdin, "%c%c", &a, &b);
-        // out << a << b;
-        if (b == 'I') { // DIE
+  // If there are not past frames enough for DQN input, just select NOOP
+  int frame = 0;
+  for (; frame < 4; ++frame){
+      term = read_screen(raw_screen);
+      if (term)
           return 0;
-        }
-        raw_screen[i][j] = hex(a) * (unsigned char)16 + hex(b);
-        //out << " " << (int)raw_screen[i][j] << std::endl;
-      }
-    };
 
-    fscanf(stdin, "%*c"); // :
-    char terminate;
-    fscanf(stdin, "%c", &terminate);
-    if (terminate == '1') {
-      return 0;
-    }
-    fgets(temp, 69999, stdin);
-      // TODO std::cout << "frame: " << frame << std::endl;
-      const auto current_frame = dqn::PreprocessArrayScreen(raw_screen, out);
-    std::cout << "AAA";
+      //std::cout << "Term " << term << std::endl;
+
+      current_frame = dqn::PreprocessArrayScreen(raw_screen);
       past_frames.push_back(current_frame);
-      if (past_frames.size() < dqn::kInputFrameCount) {
-        // If there are not past frames enough for DQN input, just select NOOP
-        for (auto i = 0; i < FLAGS_skip_frame + 1; ++i) {
-          fprintf(stdout, "%d,18", PLAYER_A_NOOP);
-          fflush(stdout);
-          fscanf(stdin, "%*c");
 
-          for (int i = 0; i < 210; ++i) {
-            for (int j = 0; j < 160; ++j) {
-              fscanf(stdin, "%*c%*c");
-            }
-          }
-          std::cin.get(); // :
+      make_action(ale, PLAYER_A_NOOP);
 
-          char term;
-          fscanf(stdin, "%c", &term); // 0
-          if (term == '1')
-            return 0;
-
-          fgets(temp, 69999, stdin);
-        }
-      } else {
-        if (past_frames.size() > dqn::kInputFrameCount) {
-          past_frames.pop_front();
-        }
-        dqn::InputFrames input_frames;
-        std::copy(past_frames.begin(), past_frames.end(), input_frames.begin());
-        const auto action = dqn.SelectAction(input_frames, FLAGS_evaluate_with_epsilon);
-        auto immediate_score = 0.0;
-        for (auto i = 0; i < FLAGS_skip_frame + 1 && !ale.game_over(); ++i) {
-          // Last action is repeated on skipped frames
-          fprintf(stdout, "%d,18", action);
-          fflush(stdout);
-          fscanf(stdin, "%*c");
-          for (int i = 0; i < 210; ++i) {
-            for (int j = 0; j < 160; ++j) {
-              fscanf(stdin, "%*c%*c");
-            }
-          }
-          fscanf(stdin, "%*c"); // :
-
-          char term;
-          fscanf(stdin, "%c", &term); // 0
-          if (term == '1')
-            return 0;
-
-          fgets(temp, 69999, stdin);
-        }
-      }
   }
+
+  for (;; ++frame) {
+
+      term = read_screen(raw_screen);
+      if (term)
+          return 0;
+
+      //std::cout << "Term " << term << std::endl;
+
+      // TODO std::cout << "frame: " << frame << std::endl;
+      current_frame = dqn::PreprocessArrayScreen(raw_screen);
+      past_frames.push_back(current_frame);
+      past_frames.pop_front();
+
+      dqn::InputFrames input_frames;
+      std::copy(past_frames.begin(), past_frames.end(), input_frames.begin());
+      const auto action = dqn.SelectAction(input_frames, FLAGS_evaluate_with_epsilon);
+      auto immediate_score = 0.0;
+      //for (auto i = 0; i < FLAGS_skip_frame + 1  && !ale.game_over(); ++i) {
+      for (auto i = 0; i < FLAGS_skip_frame; ++i) {
+          // Last action is repeated on skipped frames
+          make_action(ale, action);
+          term = read_screen(raw_screen);
+          //std::cout << "Term " << term << std::endl;
+          if (term)
+              return 0;
+      }
+      make_action(ale, action);
+      
+  }
+  //out.close();
 
   return 0;
 }
