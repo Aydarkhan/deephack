@@ -1,0 +1,11 @@
+net: "/home/shrubb/Projects/dqn-in-the-caffe/Net/dqn.prototxt"
+solver_type: ADADELTA
+momentum: 0.95
+base_lr: 0.2
+lr_policy: "step"
+gamma: 0.1
+stepsize: 1000000
+max_iter: 2000000
+display: 100
+snapshot: 5000
+snapshot_prefix: "/home/shrubb/Projects/dqn-in-the-caffe/Net/Snapshots/seaquest"
