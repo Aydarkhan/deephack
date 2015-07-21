@@ -1,1 +1,5 @@
-./build/dqn -solver="/home/ubuntu/caffe-dqn/dqn-in-the-caffe/Net/dqn_gopher_solver.prototxt" -rom="/home/ubuntu/caffe-dqn/dqn-in-the-caffe/games/Gopher.bin"
+ROOT=`pwd`
+GAME="gopher"
+
+
+./build/dqn -solver=$ROOT"/Net/dqn_"$GAME"_solver.prototxt" -rom=$ROOT"/games/"$GAME".bin" 
