@@ -1,4 +1,4 @@
-net: "/home/ubuntu/caffe-dqn/dqn-in-the-caffe/Net/dqn.prototxt"
+net: "/home/raian/DeepHackMoscow/deepmind_caffe/Net/dqn.prototxt"
 solver_type: ADADELTA
 momentum: 0.95
 base_lr: 0.2
@@ -8,6 +8,6 @@ stepsize: 1000000
 max_iter: 2000000
 display: 100
 snapshot: 2500
-snapshot_prefix: "/home/ubuntu/caffe-dqn/dqn-in-the-caffe/Net/Snapshot-tutankham/tutankham"
+snapshot_prefix: "/home/raian/DeepHackMoscow/deepmind_caffe/Net/Snapshot-tutankham/tutankham"
 solver_mode: CPU
 device_id: 3
