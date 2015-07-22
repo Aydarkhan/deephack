@@ -1,14 +1,14 @@
 cmake_minimum_required (VERSION 2.6)
 project(dqn)
 
-option(CPU_ONLY "Use CPU only for Caffe" OFF)
+option(CPU_ONLY "Use CPU only for Caffe" ON)
 option(USE_CUDNN "Use cuDNN for Caffe" OFF)
 option(USE_SDL "Use SDL for ALE" ON)
 
-include_directories(~/caffe-dqn/caffe/include/)
-include_directories(~/caffe-dqn/ALE/src)
-link_directories(~/caffe-dqn/caffe/build/lib)
-link_directories(~/caffe-dqn/ALE/)
+include_directories(~/deep_hack/caffe/include)
+include_directories(~/deep_hack/ALE/src)
+link_directories(~/deep_hack/caffe/.build_release/lib)
+link_directories(~/deep_hack/ALE)
 
 link_directories(/usr/local/lib/)
 

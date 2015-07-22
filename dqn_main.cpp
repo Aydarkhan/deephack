@@ -39,6 +39,26 @@ double CalculateEpsilon(const int iter) {
   }
 }
 
+//normalization
+float rew_max=0.0;
+float rew_min=0.0;
+
+float normalize_reward(float rew)
+{
+  if(rew_max<rew)
+  {
+    rew_max=rew;
+  }
+  if(rew_max==0.0){
+    return 0.0;
+  }
+  else
+  {
+    return rew/rew_max;
+  }
+}
+
+
 deque<list<dqn::Transition>> important_transitions;
 vector<float> priorities;
 
@@ -97,12 +117,21 @@ double PlayOneEpisode(ALEInterface& ale, dqn::DQN& dqn, const double epsilon, co
                 // Last action is repeated on skipped frames
                 immediate_score += ale.act(action);
             }
-              
-            total_score += immediate_score;
-            // Rewards for DQN are normalized as follows:
-            // 1 for any positive score, -1 for any negative score, otherwise 0
-            const auto reward = immediate_score == 0 ? 0 : immediate_score /= std::abs(immediate_score);
             
+            float reward=0.0;
+
+            if(immediate_score>0.0)
+            {
+                reward=normalize_reward(immediate_score);
+                std::cout<<" total_score: " << total_score << " immediate_score:" << immediate_score << " normalized_reward: " << reward << std::endl;
+            }
+            else
+            {
+                reward = immediate_score == 0 ? 0 : immediate_score /= std::abs(immediate_score);
+            }
+            
+            total_score += immediate_score;
+
             if (update) 
             {
                 //std::cout << "Update...\n" << FLAGS_model << std::endl;
