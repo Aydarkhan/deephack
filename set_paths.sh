@@ -1,5 +1,7 @@
 #!/bin/bash
 
+cp CMakeLists.my.txt CMakeLists.txt
+
 proto_prefix=`pwd`"/Net/"
 gopher=$proto_prefix"dqn_gopher_solver.prototxt"
 seaquest=$proto_prefix"dqn_seaquest_solver.prototxt"
