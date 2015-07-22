@@ -17,7 +17,7 @@ using std::deque;
 using std::list;
 
 DEFINE_bool(gpu, false, "Use GPU to brew Caffe");
-DEFINE_bool(gui, true, "Open a GUI window");
+DEFINE_bool(gui, false, "Open a GUI window");
 DEFINE_string(rom, "/home/ubuntu/caffe-dqn/dqn-in-the-caffe/games/seaquest.bin", "Atari 2600 ROM to play");
 DEFINE_string(solver, "/home/ubuntu/caffe-dqn/dqn-in-the-caffe/Net/dqn_solver.prototxt", "Solver parameter file (*.prototxt)");
 DEFINE_int32(memory, 500000, "Capacity of replay memory");
