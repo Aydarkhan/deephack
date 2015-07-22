@@ -1,4 +1,4 @@
 # From folder build run this
 
-
-nc 52.8.225.234 17004 < client_fifo | tee gopher_test_in | ./dqn | tee gopher_test_out > client_fifo
+mkfifo client_fifo
+nc 52.8.225.234 17004 < client_fifo | bash ./play_gopher > client_fifo
