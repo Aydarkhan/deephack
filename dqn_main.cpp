@@ -17,7 +17,7 @@ using std::deque;
 using std::list;
 
 DEFINE_bool(gpu, false, "Use GPU to brew Caffe");
-DEFINE_bool(gui, false, "Open a GUI window");
+DEFINE_bool(gui, true, "Open a GUI window");
 DEFINE_string(rom, "/home/ubuntu/caffe-dqn/dqn-in-the-caffe/games/seaquest.bin", "Atari 2600 ROM to play");
 DEFINE_string(solver, "/home/ubuntu/caffe-dqn/dqn-in-the-caffe/Net/dqn_solver.prototxt", "Solver parameter file (*.prototxt)");
 DEFINE_int32(memory, 500000, "Capacity of replay memory");
@@ -40,6 +40,7 @@ double CalculateEpsilon(const int iter) {
 }
 
 deque<list<dqn::Transition>> important_transitions;
+vector<float> priorities;
 double threshold = 0.0;
 
 int update_freq = 10000;
@@ -49,16 +50,17 @@ int total_frames = 0;
  */
 double PlayOneEpisode(ALEInterface& ale, dqn::DQN& dqn, const double epsilon, const bool update) 
 {   
-    vector<float> priorities;
     
     assert(!ale.game_over());
     std::deque<dqn::FrameDataSp> past_frames;
     auto total_score = 0.0;
+
+    double mad = 0.0;
+    double priorities_sum = 0.0;
      
-    for (auto frame = 0; !ale.game_over(); ++frame) 
-    {
-    	++total_frames;
-        std::cout << "frame: " << frame << std::endl;
+    for (auto frame = 0; !ale.game_over(); ++frame, ++total_frames) 
+    {    	
+        //std::cout << "frame: " << frame << std::endl;
         const auto current_frame = dqn::PreprocessScreenImproved(ale.getScreen());
         if (FLAGS_show_frame) 
         {
@@ -116,8 +118,16 @@ double PlayOneEpisode(ALEInterface& ale, dqn::DQN& dqn, const double epsilon, co
 		        float predicted_qvalue = actions_and_values.front().second;
 		        float priority = fabs(reward + FLAGS_gamma * predicted_qvalue - max_qvalue);
 
-		        priorities.push_back(priority);
-		        //std::cout << "Priority " << priority << std::endl;		        
+		        priorities.push_back(priority);		        
+                priorities_sum += priority;
+                double mean = priorities_sum / (priorities.size() * .1);
+                double std2 = 0.0;
+                for (auto p: priorities)
+                {
+                	std2 += (mean - p) * (mean - p); 
+                }
+                std2 /= (priorities.size() * 1.0);
+                threshold = mean - 3 * std2;
 
                 const auto transition = ale.game_over() ? 
                                             dqn::Transition(input_frames, action, reward, boost::none):

@@ -427,8 +427,6 @@ namespace dqn {
         std::fill(filter_input.begin(), filter_input.end(), 0.0f);
         auto target_value_idx = 0;
 
-        double discount_factor_for_path = 0.9;
-
         list<list<Transition>> transition_batch;
         for (auto ind: transitions_inds) 
         {
@@ -450,6 +448,7 @@ namespace dqn {
             assert(ereward >= -1.0 && ereward <= 1.0);                  
 
             double target_path_end;
+            double discount_factor_for_path = 0.9;
 
             //std::cout << "Propagating signal to previous associated states" << std::endl;
 
