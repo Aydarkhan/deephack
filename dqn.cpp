@@ -567,11 +567,11 @@ namespace dqn {
         int x_ratio = ((kRawFrameWidth << 16) / 84) +1;
         int y_ratio = ((kRawFrameHeight << 16) / 84) +1;
         int x2, y2;
-        for (int i=0; i < kRawFrameHeight; i++) {
-            for (int j=0; j < kRawFrameWidth; j++) {
+        for (int i=0; i < kCroppedFrameSize; i++) {
+            for (int j=0; j < kCroppedFrameSize; j++) {
                 x2 = ((j * x_ratio) >> 16) ;
                 y2 = ((i * y_ratio) >> 16) ;
-                std::cout << x2 << " " << y2 << "\n";
+                //std::cout << x2 << " " << y2 << "\n";
                 (*screen)[(i * 84) + j] = raw_pixels[(y2*kRawFrameWidth)+x2] ;
             }
         }
@@ -588,8 +588,8 @@ namespace dqn {
         int x_ratio = ((kRawFrameWidth << 16) / 84) +1;
         int y_ratio = ((kRawFrameHeight << 16) / 84) +1;
         int x2, y2;
-        for (int i=0; i < kRawFrameHeight; i++) {
-            for (int j=0; j < kRawFrameWidth; j++) {
+        for (int i=0; i < kCroppedFrameSize; i++) {
+            for (int j=0; j < kCroppedFrameSize; j++) {
                 x2 = ((j * x_ratio) >> 16) ;
                 y2 = ((i * y_ratio) >> 16) ;
                 //std::cout << x2 << " " << y2 << "\n";
@@ -599,5 +599,4 @@ namespace dqn {
 
         return screen;
     }
-
 }
