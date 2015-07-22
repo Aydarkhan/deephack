@@ -10,6 +10,15 @@
 #include <caffe/caffe.hpp>
 #include <boost/functional/hash.hpp>
 #include <boost/optional.hpp>
+#include <queue>
+#include <vector>
+#include <cmath>
+#include <list>
+
+using std::priority_queue;
+using std::vector;
+using std::deque;
+using std::list;
 
 namespace dqn {
 
