@@ -81,7 +81,6 @@ namespace dqn {
         std::cout << std::endl;
          */
 
-
         assert(raw_pixels[0].size() == kRawFrameWidth);
         assert(raw_pixels.size() == kRawFrameHeight);
         auto screen = std::make_shared<FrameData>();
