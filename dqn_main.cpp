@@ -5,6 +5,15 @@
 #include <gflags/gflags.h>
 #include "prettyprint.hpp"
 #include "dqn.hpp"
+#include <queue>
+#include <vector>
+#include <cmath>
+#include <list>
+
+using std::priority_queue;
+using std::vector;
+using std::deque;
+using std::list;
 
 DEFINE_bool(gpu, false, "Use GPU to brew Caffe");
 DEFINE_bool(gui, false, "Open a GUI window");
@@ -29,6 +38,10 @@ double CalculateEpsilon(const int iter) {
   }
 }
 
+deque<list<dqn::Transition>> important_transitions;
+double threshold = 0.0;
+
+int update_freq = 10000;
 /**
  * Play one episode and return the total score
  */
@@ -41,23 +54,26 @@ double PlayOneEpisode(
     assert(!ale.game_over());
     std::deque<dqn::FrameDataSp> past_frames;
     auto total_score = 0.0;
+
+    int cframe = 0;
   
-    for (auto frame = 0; !ale.game_over(); ++frame) 
+    for (auto frame = 0; !ale.game_over(); ++frame, ++cframe) 
     {
         // TODO std::cout << "frame: " << frame << std::endl;
         const auto current_frame = dqn::PreprocessScreen(ale.getScreen());
         if (FLAGS_show_frame) 
         {
-              std::cout << dqn::DrawFrame(*current_frame) << std::endl;
+            std::cout << dqn::DrawFrame(*current_frame) << std::endl;
         }
-        past_frames.push_back(current_frame);
+        
+        past_frames.push_back(current_frame);        
         if (past_frames.size() < dqn::kInputFrameCount) 
         {
-              // If there are not past frames enough for DQN input, just select NOOP
-              for (auto i = 0; i < FLAGS_skip_frame + 1 && !ale.game_over(); ++i) 
-              {
+            // If there are not past frames enough for DQN input, just select NOOP
+            for (auto i = 0; i < FLAGS_skip_frame + 1 && !ale.game_over(); ++i) 
+            {
                 total_score += ale.act(PLAYER_A_NOOP);
-              }
+            }
         } 
         else 
         {
@@ -68,13 +84,17 @@ double PlayOneEpisode(
           
             dqn::InputFrames input_frames;
             std::copy(past_frames.begin(), past_frames.end(), input_frames.begin());
-            const auto action = dqn.SelectAction(input_frames, epsilon);
+            
+            float max_qvalue;
+            const auto action = dqn.SelectAction(input_frames, epsilon, max_qvalue);
+            
             auto immediate_score = 0.0;
             for (auto i = 0; i < FLAGS_skip_frame + 1 && !ale.game_over(); ++i) 
             {
                 // Last action is repeated on skipped frames
                 immediate_score += ale.act(action);
-            } 
+            }
+              
             total_score += immediate_score;
             // Rewards for DQN are normalized as follows:
             // 1 for any positive score, -1 for any negative score, otherwise 0
@@ -82,15 +102,35 @@ double PlayOneEpisode(
             
             if (update) 
             {
-                // Add the current transition to replay memory
-                const auto transition = ale.game_over() ? 
-                                            dqn::Transition(input_frames, action, reward, boost::none) :
-                                            dqn::Transition(input_frames, action, reward, dqn::PreprocessScreen(ale.getScreen()));
-                dqn.AddTransition(transition);
-                // If the size of replay memory is enough, update DQN
-                if (dqn.memory_size() > FLAGS_memory_threshold) 
+
+                //std::cout << "Update...\n" << FLAGS_model << std::endl;
+                // Add the current transition to replay memory                
+                dqn::FrameDataSp next_state; 
+                if (!ale.game_over()) 
                 {
-                      dqn.Update();
+                    next_state = dqn::PreprocessScreen(ale.getScreen());    
+                }
+
+                std::vector<dqn::InputFrames> inputFramesVect;
+                inputFramesVect.push_back(input_frames);
+		        const std::vector<std::pair<Action, float>> actions_and_values = dqn.SelectActionGreedily(inputFramesVect);
+
+		        float predicted_qvalue = actions_and_values.front().second;
+		        float priority = fabs(reward + FLAGS_gamma * predicted_qvalue - max_qvalue);
+		        //std::cout << "Priority " << priority << std::endl;		        
+
+                const auto transition = ale.game_over() ? 
+                                            dqn::Transition(input_frames, action, reward, boost::none):
+                                            dqn::Transition(input_frames, action, reward, next_state);
+                
+                dqn.AddTransition(transition, important_transitions, priority > threshold);
+                
+                // If the size of replay memory is enough, update DQN
+                if (cframe == update_freq) //> FLAGS_memory_threshold 
+                {                	
+                	//Add improvement here
+                    dqn.Update(max_qvalue, important_transitions);                    
+                    cframe = 0;
                 }
             }
         }
@@ -100,7 +140,8 @@ double PlayOneEpisode(
     return total_score;
 }
 
-int main(int argc, char** argv) {
+int main(int argc, char** argv) 
+{
   gflags::ParseCommandLineFlags(&argc, &argv, true);
   google::InitGoogleLogging(argv[0]);
   google::InstallFailureSignalHandler();

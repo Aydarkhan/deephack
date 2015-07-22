@@ -63,30 +63,32 @@ public:
   /**
    * Select an action by epsilon-greedy.
    */
-  Action SelectAction(const InputFrames& input_frames, double epsilon);
+  Action SelectAction(const InputFrames& input_frames, double epsilon, float& max_qvalue);
 
   /**
    * Add a transition to replay memory
    */
-  void AddTransition(const Transition& transition);
+
+  void AddTransition(const Transition& transition, deque<list<Transition>>& important_transitions, bool has_high_priority);
 
   /**
    * Update DQN using one minibatch
    */
-  void Update();
+  void Update(float& max_qvalue, const deque<list<Transition>>& important_transitions);
 
   int memory_size() const { return replay_memory_.size(); }
   int current_iteration() const { return current_iter_; }
+  std::vector<std::pair<Action, float>> SelectActionGreedily(const std::vector<InputFrames>& last_frames_batch);
+  
 
 private:
   using SolverSp = std::shared_ptr<caffe::Solver<float>>;
   using NetSp = boost::shared_ptr<caffe::Net<float>>;
   using BlobSp = boost::shared_ptr<caffe::Blob<float>>;
   using MemoryDataLayerSp = boost::shared_ptr<caffe::MemoryDataLayer<float>>;
-
+  
   std::pair<Action, float> SelectActionGreedily(const InputFrames& last_frames);
-  std::vector<std::pair<Action, float>> SelectActionGreedily(
-      const std::vector<InputFrames>& last_frames);
+
   void InputDataIntoLayers(
       const FramesLayerInputData& frames_data,
       const TargetLayerInputData& target_data,
