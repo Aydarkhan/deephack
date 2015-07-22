@@ -113,6 +113,7 @@ int main(int argc, char** argv) {
   //freopen("simple_in", "r", stdin);
 
   fprintf(stdout, "team_4,CZELol,gopher\n");
+
   fflush(stdout);
   std::ofstream out("test.txt");
 

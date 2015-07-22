@@ -63,6 +63,7 @@ bool read_screen(std::vector<std::vector<unsigned char>> &raw_screen){
 
   char temp;
   fscanf(stdin, "%c", &temp); // :
+  //std::cerr << temp << std::endl;
   fscanf(stdin, "%c", &terminate);
   fscanf(stdin, "%c", &temp); // :
   std::cin.get(reward, 9, ':');

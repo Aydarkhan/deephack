@@ -91,10 +91,13 @@ namespace dqn {
         const auto y_ratio = kRawFrameHeight / static_cast<double>(kCroppedFrameSize);
         for (auto i = 0; i < kCroppedFrameSize; ++i) {
             for (auto j = 0; j < kCroppedFrameSize; ++j) {
-                const auto first_x = static_cast<int>(std::floor(j * x_ratio));
-                const auto last_x = static_cast<int>(std::floor((j + 1) * x_ratio));
-                const auto first_y = static_cast<int>(std::floor(i * y_ratio));
-                const auto last_y = static_cast<int>(std::floor((i + 1) * y_ratio));
+                auto first_x = static_cast<int>(std::floor(j * x_ratio));
+                auto last_x = static_cast<int>(std::floor((j + 1) * x_ratio));
+                auto first_y = static_cast<int>(std::floor(i * y_ratio));
+                auto last_y = static_cast<int>(std::floor((i + 1) * y_ratio));
+                if (last_x == kRawFrameWidth) --last_x;
+                if (last_y == kRawFrameHeight) --last_y;
+
                 auto x_sum = 0.0;
                 auto y_sum = 0.0;
                 uint8_t resulting_color = 0.0;
