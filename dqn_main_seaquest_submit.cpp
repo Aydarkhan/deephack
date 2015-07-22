@@ -9,15 +9,15 @@
 
 DEFINE_bool(gpu, false, "Use GPU to brew Caffe");
 DEFINE_bool(gui, false, "Open a GUI window");
-DEFINE_string(rom, "../games/gopher.bin", "Atari 2600 ROM to play");
-DEFINE_string(solver, "../Net/dqn_gopher_solver.prototxt", "Solver parameter file (*.prototxt)");
+DEFINE_string(rom, "../games/seaquest.bin", "Atari 2600 ROM to play");
+DEFINE_string(solver, "../Net/dqn_seaquest_solver.prototxt", "Solver parameter file (*.prototxt)");
 DEFINE_int32(memory, 500000, "Capacity of replay memory");
 DEFINE_int32(explore, 1000000, "Number of iterations needed for epsilon to reach 0.1");
 DEFINE_double(gamma, 0.95, "Discount factor of future rewards (0,1]");
 DEFINE_int32(memory_threshold, 100, "Enough amount of transitions to start learning");
 DEFINE_int32(skip_frame, 3, "Number of frames skipped");
 DEFINE_bool(show_frame, false, "Show the current frame in CUI");
-DEFINE_string(model, "../Net/Snapshot-gopher/gopher_iter_247500.caffemodel", "Model file to load");
+DEFINE_string(model, "../Net/Snapshot-seaquest/seaquest_iter_20000.caffemodel", "Model file to load");
 DEFINE_bool(evaluate, true, "Evaluation mode: only playing a game, no updates");
 DEFINE_double(evaluate_with_epsilon, 0.05, "Epsilon value to be used in evaluation mode");
 DEFINE_double(repeat_games, 30, "Number of games played in evaluation mode");
@@ -63,6 +63,7 @@ bool read_screen(std::vector<std::vector<unsigned char>> &raw_screen){
 
   char temp;
   fscanf(stdin, "%c", &temp); // :
+  //std::cerr << temp << std::endl;
   fscanf(stdin, "%c", &terminate);
   fscanf(stdin, "%c", &temp); // :
   std::cin.get(reward, 9, ':');
@@ -112,8 +113,7 @@ int main(int argc, char** argv) {
 
   //freopen("simple_in", "r", stdin);
 
-  fprintf(stdout, "team_4,CZELol,gopher\n");
-
+  fprintf(stdout, "team_4,CZELol,seaquest\n");
   fflush(stdout);
   std::ofstream out("test.txt");
 

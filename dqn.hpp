@@ -114,7 +114,7 @@ private:
  * Preprocess an ALE screen (downsampling & grayscaling)
  */
 FrameDataSp PreprocessScreen(const ALEScreen& raw_screen);
-FrameDataSp PreprocessArrayScreen(const std::vector<std::vector<unsigned char>>& raw_pixels, std::ofstream &out);
+FrameDataSp PreprocessArrayScreen(const std::vector<std::vector<unsigned char>>& raw_pixels);
 
 
 
