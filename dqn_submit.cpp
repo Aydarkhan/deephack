@@ -150,6 +150,7 @@ int main(int argc, char** argv) {
   bool term;
 
   // If there are not past frames enough for DQN input, just select NOOP
+  float max_qvalue;
   int frame = 0;
   for (; frame < 4; ++frame){
       term = read_screen(raw_screen);
@@ -180,7 +181,7 @@ int main(int argc, char** argv) {
 
       dqn::InputFrames input_frames;
       std::copy(past_frames.begin(), past_frames.end(), input_frames.begin());
-      const auto action = dqn.SelectAction(input_frames, FLAGS_evaluate_with_epsilon);
+      const auto action = dqn.SelectAction(input_frames, FLAGS_evaluate_with_epsilon, max_qvalue);
       auto immediate_score = 0.0;
       //for (auto i = 0; i < FLAGS_skip_frame + 1  && !ale.game_over(); ++i) {
       for (auto i = 0; i < FLAGS_skip_frame; ++i) {
