@@ -1,5 +1,6 @@
 #include <cmath>
 #include <iostream>
+#include <fstream>
 #include <ale_interface.hpp>
 #include <glog/logging.h>
 #include <gflags/gflags.h>
@@ -46,12 +47,10 @@ int total_frames = 0;
 /**
  * Play one episode and return the total score
  */
-double PlayOneEpisode(
-    ALEInterface& ale,
-    dqn::DQN& dqn,
-    const double epsilon,
-    const bool update) 
-{
+double PlayOneEpisode(ALEInterface& ale, dqn::DQN& dqn, const double epsilon, const bool update) 
+{   
+    vector<float> priorities;
+    
     assert(!ale.game_over());
     std::deque<dqn::FrameDataSp> past_frames;
     auto total_score = 0.0;
@@ -116,6 +115,8 @@ double PlayOneEpisode(
 
 		        float predicted_qvalue = actions_and_values.front().second;
 		        float priority = fabs(reward + FLAGS_gamma * predicted_qvalue - max_qvalue);
+
+		        priorities.push_back(priority);
 		        //std::cout << "Priority " << priority << std::endl;		        
 
                 const auto transition = ale.game_over() ? 
@@ -135,6 +136,13 @@ double PlayOneEpisode(
     }
 
     ale.reset_game();
+    
+    std::ofstream out("priorities.txt", std::ofstream::app);
+    for (auto val: priorities) 
+    {
+        out << val << endl; 
+    }
+    
     return total_score;
 }
 
