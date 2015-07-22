@@ -275,16 +275,22 @@ namespace dqn {
                 *net_->blob_by_name("filter"), kMinibatchSize, kOutputCount, 1, 1));
     }
 
-    Action DQN::SelectAction(const InputFrames& last_frames, const double epsilon) {
+    Action DQN::SelectAction(const InputFrames& last_frames, const double epsilon, float& max_qvalue) 
+    {
         assert(epsilon >= 0.0 && epsilon <= 1.0);
-        auto action = SelectActionGreedily(last_frames).first;
-        if (std::uniform_real_distribution<>(0.0, 1.0)(random_engine) < epsilon) {
+        auto action_qvalue = SelectActionGreedily(last_frames);
+        auto action = action_qvalue.first;
+        max_qvalue = action_qvalue.second;
+        
+        if (std::uniform_real_distribution<>(0.0, 1.0)(random_engine) < epsilon) 
+        {
             // Select randomly
-            const auto random_idx =
-                    std::uniform_int_distribution<int>(0, legal_actions_.size() - 1)(random_engine);
+            const auto random_idx = std::uniform_int_distribution<int>(0, legal_actions_.size() - 1)(random_engine);
             action = legal_actions_[random_idx];
             // TODO std::cout << action_to_string(action) << " (random)";
-        } else {
+        } 
+        else 
+        {
             // TODO std::cout << action_to_string(action) << " (greedy)";
         }
         // TODO std::cout << " epsilon:" << epsilon << std::endl;
@@ -295,91 +301,127 @@ namespace dqn {
         return SelectActionGreedily(std::vector<InputFrames>{{last_frames}}).front();
     }
 
-    std::vector<std::pair<Action, float>> DQN::SelectActionGreedily(
-            const std::vector<InputFrames>& last_frames_batch) {
+    std::vector<std::pair<Action, float>> DQN::SelectActionGreedily(const std::vector<InputFrames>& last_frames_batch) {
         assert(last_frames_batch.size() <= kMinibatchSize);
         std::array<float, kMinibatchDataSize> frames_input;
-        for (auto i = 0; i < last_frames_batch.size(); ++i) {
+
+        for (auto i = 0; i < last_frames_batch.size(); ++i) 
+        {
             // Input frames to the net and compute Q values for each legal actions
-            for (auto j = 0; j < kInputFrameCount; ++j) {
+            for (auto j = 0; j < kInputFrameCount; ++j) 
+            {
                 const auto& frame_data = last_frames_batch[i][j];
-                std::copy(
-                        frame_data->begin(),
-                        frame_data->end(),
-                        frames_input.begin() + i * kInputDataSize +
-                        j * kCroppedFrameDataSize);
+                std::copy(frame_data->begin(), frame_data->end(), frames_input.begin() + i * kInputDataSize + j * kCroppedFrameDataSize);
             }
         }
+
         InputDataIntoLayers(frames_input, dummy_input_data_, dummy_input_data_);
         net_->ForwardPrefilled(nullptr);
 
         std::vector<std::pair<Action, float>> results;
         results.reserve(last_frames_batch.size());
+
         for (auto i = 0; i < last_frames_batch.size(); ++i) {
             // Get the Q values from the net
-            const auto action_evaluator = [&](Action action) {
+            const auto action_evaluator = [&](Action action) 
+            {
                 const auto q = q_values_blob_->data_at(i, static_cast<int>(action), 0, 0);
                 assert(!std::isnan(q));
                 return q;
             };
+
             std::vector<float> q_values(legal_actions_.size());
-            std::transform(
-                    legal_actions_.begin(),
-                    legal_actions_.end(),
-                    q_values.begin(),
-                    action_evaluator);
-            if (last_frames_batch.size() == 1) {
+            std::transform(legal_actions_.begin(), legal_actions_.end(), q_values.begin(), action_evaluator);
+            if (last_frames_batch.size() == 1) 
+            {
                 // TODO std::cout << PrintQValues(q_values, legal_actions_);
             }
 
             // Select the action with the maximum Q value
-            const auto max_idx =
-                    std::distance(
-                            q_values.begin(),
-                            std::max_element(q_values.begin(), q_values.end()));
+            const auto max_idx = std::distance(q_values.begin(), std::max_element(q_values.begin(), q_values.end()));  
             results.emplace_back(legal_actions_[max_idx], q_values[max_idx]);
         }
         return results;
     }
 
-    void DQN::AddTransition(const Transition& transition) {
-        if (replay_memory_.size() == replay_memory_capacity_) {
-            replay_memory_.pop_front();
+    void DQN::AddTransition(const Transition& transition, deque<list<Transition>>& important_transitions, bool has_high_priority) 
+    {
+        if (important_transitions.size() == replay_memory_capacity_) 
+        {
+            if (important_transitions.size() > 0 && replay_memory_.front() == important_transitions.front().front()) 
+            {            
+                replay_memory_.pop_front();
+                important_transitions.pop_front();
+            }
+            //We should remove pointer from *important* elements deque 
         }
+
         replay_memory_.push_back(transition);
+        
+        if (has_high_priority) 
+        {
+            list<Transition> transitions_path;
+            transitions_path.push_back(transition);
+
+            int memory_run = 4;
+            int take = 0;
+            for (auto it = replay_memory_.rbegin(); it != replay_memory_.rend() && take < memory_run; ++it, ++take) 
+            {
+                transitions_path.push_back(*it);
+            } 
+
+            while (replay_memory_.size() > memory_run) 
+            {
+                replay_memory_.pop_front();
+            }
+
+            important_transitions.push_back(transitions_path);
+        }        
     }
 
-    void DQN::Update() {
+    void DQN::Update(float& max_qvalue, const deque<list<Transition>>& important_transitions) 
+    {
         std::cout << "iteration: " << current_iter_++ << std::endl;
 
         // Sample transitions from replay memory
-        std::vector<int> transitions;
-        transitions.reserve(kMinibatchSize);
-        for (auto i = 0; i < kMinibatchSize; ++i) {
-            const auto random_transition_idx =
-                    std::uniform_int_distribution<int>(0, replay_memory_.size() - 1)(
-                            random_engine);
-            transitions.push_back(random_transition_idx);
+        int update_batch_size = kMinibatchSize; //(int)important_transitions.size() / 6; //some size variable should be used here
+                
+        std::vector<int> transitions_inds;
+        transitions_inds.reserve(update_batch_size);
+        for (auto i = 0; i < update_batch_size; ++i) 
+        {
+            const auto random_transition_idx = std::uniform_int_distribution<int>(0, important_transitions.size() - 1)(random_engine);
+            transitions_inds.push_back(random_transition_idx);
         }
+
+        //std::cout << "got random indices" << std::endl;
 
         // Compute target values: max_a Q(s',a)
         std::vector<InputFrames> target_last_frames_batch;
-        for (const auto idx : transitions) {
-            const auto& transition = replay_memory_[idx];
-            if (!std::get<3>(transition)) {
+        for (const auto idx : transitions_inds) 
+        {
+            const auto& transition = important_transitions[idx].front();
+            if (!std::get<3>(transition)) 
+            {
                 // This is a terminal state
                 continue;
             }
             // Compute target value
             InputFrames target_last_frames;
-            for (auto i = 0; i < kInputFrameCount - 1; ++i) {
+            for (auto i = 0; i < kInputFrameCount - 1; ++i) 
+            {
                 target_last_frames[i] = std::get<0>(transition)[i + 1];
             }
+
             target_last_frames[kInputFrameCount - 1] = std::get<3>(transition).get();
             target_last_frames_batch.push_back(target_last_frames);
-        }
-        const auto actions_and_values =
-                SelectActionGreedily(target_last_frames_batch);
+        } 
+
+        //std::cout << "got target frames" << std::endl;
+
+        const auto actions_and_values = SelectActionGreedily(target_last_frames_batch);
+
+        //std::cout << "got actions and values" << std::endl;
 
         FramesLayerInputData frames_input;
         TargetLayerInputData target_input;
@@ -387,19 +429,95 @@ namespace dqn {
         std::fill(target_input.begin(), target_input.end(), 0.0f);
         std::fill(filter_input.begin(), filter_input.end(), 0.0f);
         auto target_value_idx = 0;
-        for (auto i = 0; i < kMinibatchSize; ++i) {
+
+        double discount_factor_for_path = 0.9;
+
+        list<list<Transition>> transition_batch;
+        for (auto ind: transitions_inds) 
+        {
+            transition_batch.push_back(important_transitions[ind]);
+        }
+
+        //std::cout << "got transition batch" << std::endl;
+
+        int i = 0;
+
+        for (auto important_transition_path : transition_batch) 
+        {
+            //std::cout << "Performing Q update #" << i << std::endl;
+            Transition etransition = important_transition_path.front();
+
+            const auto eaction = std::get<1>(etransition);
+            assert(static_cast<int>(eaction) < kOutputCount);
+            const auto ereward = std::get<2>(etransition);
+            assert(ereward >= -1.0 && ereward <= 1.0);                  
+
+            double target_path_end;
+
+            //std::cout << "Propagating signal to previous associated states" << std::endl;
+
+            for (auto transition: important_transition_path) 
+            {
+                const auto action = std::get<1>(transition);
+                assert(static_cast<int>(action) < kOutputCount);
+                const auto reward = std::get<2>(transition);
+                assert(reward >= -1.0 && reward <= 1.0);                  
+
+                float target = 0.0;
+
+                if (i == 0) 
+                {
+                    if (std::get<3>(etransition)) 
+                    {
+                        target = ereward + gamma_ * actions_and_values[target_value_idx++].second;
+                    } 
+                    else 
+                    {
+                        target = ereward;
+                    }
+                } 
+                else 
+                {
+                    target = target_path_end * discount_factor_for_path; //distributing the signal from important event                
+                }
+               
+                assert(!std::isnan(target));
+                
+                //note: using TargetLayerInputData = std::array<float, kMinibatchSize * kOutputCount>, from dqn.hpp;
+                target_input[i * kOutputCount + static_cast<int>(action)] = target;
+                filter_input[i * kOutputCount + static_cast<int>(action)] = 1;
+
+                VLOG(1) << "filter:" << action_to_string(action) << " target:" << target;
+            
+                for (auto j = 0; j < kInputFrameCount; ++j) 
+                {
+                    const auto& frame_data = std::get<0>(transition)[j];
+                    std::copy(frame_data->begin(), frame_data->end(), frames_input.begin() + i * kInputDataSize + j * kCroppedFrameDataSize);
+                }
+            }
+            i++;
+        }
+
+        //std::cout << "q-values have been updated" << std::endl;
+
+        /*
+        for (auto i = 0; i < kMinibatchSize; ++i) 
+        {
             const auto& transition = replay_memory_[transitions[i]];
             const auto action = std::get<1>(transition);
             assert(static_cast<int>(action) < kOutputCount);
             const auto reward = std::get<2>(transition);
             assert(reward >= -1.0 && reward <= 1.0);
-            const auto target = std::get<3>(transition) ?
-                                reward + gamma_ * actions_and_values[target_value_idx++].second :
-                                reward;
+            
+            //HERE
+            const auto target = std::get<3>(transition) ? reward + gamma_ * actions_and_values[target_value_idx++].second : reward;
+
             assert(!std::isnan(target));
             target_input[i * kOutputCount + static_cast<int>(action)] = target;
             filter_input[i * kOutputCount + static_cast<int>(action)] = 1;
+
             VLOG(1) << "filter:" << action_to_string(action) << " target:" << target;
+            
             for (auto j = 0; j < kInputFrameCount; ++j) {
                 const auto& frame_data = std::get<0>(transition)[j];
                 std::copy(
@@ -408,7 +526,8 @@ namespace dqn {
                         frames_input.begin() + i * kInputDataSize +
                         j * kCroppedFrameDataSize);
             }
-        }
+        }*/
+        
         InputDataIntoLayers(frames_input, target_input, filter_input);
         solver_->Step(1);
         // Log the first parameter of each hidden layer
