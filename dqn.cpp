@@ -476,6 +476,7 @@ namespace dqn {
                 else 
                 {
                     target = target_path_end * discount_factor_for_path; //distributing the signal from important event                
+                    discount_factor_for_path *= discount_factor_for_path;
                 }
                
                 assert(!std::isnan(target));
@@ -570,6 +571,7 @@ namespace dqn {
             for (int j=0; j < kRawFrameWidth; j++) {
                 x2 = ((j * x_ratio) >> 16) ;
                 y2 = ((i * y_ratio) >> 16) ;
+                std::cout << x2 << " " << y2 << "\n";
                 (*screen)[(i * 84) + j] = raw_pixels[(y2*kRawFrameWidth)+x2] ;
             }
         }
@@ -590,6 +592,7 @@ namespace dqn {
             for (int j=0; j < kRawFrameWidth; j++) {
                 x2 = ((j * x_ratio) >> 16) ;
                 y2 = ((i * y_ratio) >> 16) ;
+                //std::cout << x2 << " " << y2 << "\n";
                 (*screen)[(i * 84) + j] = raw_pixels[y2][x2] ;
             }
         }
