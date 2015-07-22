@@ -42,6 +42,7 @@ deque<list<dqn::Transition>> important_transitions;
 double threshold = 0.0;
 
 int update_freq = 10000;
+int total_frames = 0;
 /**
  * Play one episode and return the total score
  */
@@ -54,12 +55,11 @@ double PlayOneEpisode(
     assert(!ale.game_over());
     std::deque<dqn::FrameDataSp> past_frames;
     auto total_score = 0.0;
-
-    int cframe = 0;
-  
-    for (auto frame = 0; !ale.game_over(); ++frame, ++cframe) 
+     
+    for (auto frame = 0; !ale.game_over(); ++frame) 
     {
-        // TODO std::cout << "frame: " << frame << std::endl;
+    	++total_frames;
+        std::cout << "frame: " << frame << std::endl;
         const auto current_frame = dqn::PreprocessScreen(ale.getScreen());
         if (FLAGS_show_frame) 
         {
@@ -102,7 +102,6 @@ double PlayOneEpisode(
             
             if (update) 
             {
-
                 //std::cout << "Update...\n" << FLAGS_model << std::endl;
                 // Add the current transition to replay memory                
                 dqn::FrameDataSp next_state; 
@@ -126,11 +125,10 @@ double PlayOneEpisode(
                 dqn.AddTransition(transition, important_transitions, priority > threshold);
                 
                 // If the size of replay memory is enough, update DQN
-                if (cframe == update_freq) //> FLAGS_memory_threshold 
+                if (total_frames % update_freq == 0) //> FLAGS_memory_threshold 
                 {                	
                 	//Add improvement here
-                    dqn.Update(max_qvalue, important_transitions);                    
-                    cframe = 0;
+                    dqn.Update(max_qvalue, important_transitions);
                 }
             }
         }
