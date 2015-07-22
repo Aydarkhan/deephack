@@ -556,4 +556,45 @@ namespace dqn {
                 kMinibatchSize);
     }
 
+    FrameDataSp PreprocessScreenImproved(const ALEScreen& raw_screen) {
+        assert(raw_screen.width() == kRawFrameWidth);
+        assert(raw_screen.height() == kRawFrameHeight);
+        const auto raw_pixels = raw_screen.getArray();
+        auto screen = std::make_shared<FrameData>();
+        assert(kRawFrameHeight > kRawFrameWidth);
+
+        int x_ratio = ((kRawFrameWidth << 16) / 84) +1;
+        int y_ratio = ((kRawFrameHeight << 16) / 84) +1;
+        int x2, y2;
+        for (int i=0; i < kRawFrameHeight; i++) {
+            for (int j=0; j < kRawFrameWidth; j++) {
+                x2 = ((j * x_ratio) >> 16) ;
+                y2 = ((i * y_ratio) >> 16) ;
+                (*screen)[(i * 84) + j] = raw_pixels[(y2*kRawFrameWidth)+x2] ;
+            }
+        }
+
+        return screen;
+    }
+
+    FrameDataSp PreprocessArrayScreenImproved(const std::vector<std::vector<unsigned char>>& raw_pixels) {
+        assert(raw_pixels[0].size() == kRawFrameWidth);
+        assert(raw_pixels.size() == kRawFrameHeight);
+        auto screen = std::make_shared<FrameData>();
+        assert(kRawFrameHeight > kRawFrameWidth);
+
+        int x_ratio = ((kRawFrameWidth << 16) / 84) +1;
+        int y_ratio = ((kRawFrameHeight << 16) / 84) +1;
+        int x2, y2;
+        for (int i=0; i < kRawFrameHeight; i++) {
+            for (int j=0; j < kRawFrameWidth; j++) {
+                x2 = ((j * x_ratio) >> 16) ;
+                y2 = ((i * y_ratio) >> 16) ;
+                (*screen)[(i * 84) + j] = raw_pixels[y2][x2] ;
+            }
+        }
+
+        return screen;
+    }
+
 }

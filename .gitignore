@@ -7,6 +7,8 @@ CMakeLists.txt
 Net/dqn_gopher_solver.prototxt
 Net/dqn_seaquest_solver.prototxt
 Net/dqn_tutankham_solver.prototxt
-Net/Snapshots-*
+/Net/Snapshots-gopher
+/Net/Snapshots-seaquest
+/Net/Snapshots-tutankham
 CMakeLists.my.txt
 

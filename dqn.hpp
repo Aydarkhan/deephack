@@ -125,7 +125,8 @@ private:
 FrameDataSp PreprocessScreen(const ALEScreen& raw_screen);
 FrameDataSp PreprocessArrayScreen(const std::vector<std::vector<unsigned char>>& raw_pixels);
 
-
+FrameDataSp PreprocessArrayScreenImproved(const std::vector<std::vector<unsigned char>>& raw_pixels);
+FrameDataSp PreprocessScreenImproved(const ALEScreen& raw_screen);
 
 /**
  * Draw a frame as a string

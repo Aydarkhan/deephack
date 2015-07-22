@@ -5,12 +5,10 @@ option(CPU_ONLY "Use CPU only for Caffe" ON)
 option(USE_CUDNN "Use cuDNN for Caffe" OFF)
 option(USE_SDL "Use SDL for ALE" ON)
 
-include_directories(~/Documents/projects/deephack/caffe-dqn/include)
-include_directories(~/Documents/projects/deephack/Arcade-Learning-Environment/src)
-link_directories(~/Documents/projects/deephack/caffe-dqn/build/lib)
-link_directories(~/Documents/projects/deephack/Arcade-Learning-Environment/)
-link_directories(/usr/local/lib/)
-
+include_directories(~/Programs/CaffeDQN/caffe/include)
+include_directories(~/Programs/ALE/src)
+link_directories(~/Programs/CaffeDQN/caffe/build/lib)
+link_directories(~/Programs/ALE)
 
 #include_directories(/opt/OpenBLAS/include)
 

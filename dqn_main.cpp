@@ -60,7 +60,7 @@ double PlayOneEpisode(
     {
     	++total_frames;
         std::cout << "frame: " << frame << std::endl;
-        const auto current_frame = dqn::PreprocessScreen(ale.getScreen());
+        const auto current_frame = dqn::PreprocessScreenImproved(ale.getScreen());
         if (FLAGS_show_frame) 
         {
             std::cout << dqn::DrawFrame(*current_frame) << std::endl;
@@ -107,7 +107,7 @@ double PlayOneEpisode(
                 dqn::FrameDataSp next_state; 
                 if (!ale.game_over()) 
                 {
-                    next_state = dqn::PreprocessScreen(ale.getScreen());    
+                    next_state = dqn::PreprocessScreenImproved(ale.getScreen());    
                 }
 
                 std::vector<dqn::InputFrames> inputFramesVect;
