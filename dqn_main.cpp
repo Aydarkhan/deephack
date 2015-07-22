@@ -41,6 +41,7 @@ double CalculateEpsilon(const int iter) {
 
 deque<list<dqn::Transition>> important_transitions;
 vector<float> priorities;
+
 double threshold = 0.0;
 
 int update_freq = 10000;
@@ -57,6 +58,7 @@ double PlayOneEpisode(ALEInterface& ale, dqn::DQN& dqn, const double epsilon, co
 
     double mad = 0.0;
     double priorities_sum = 0.0;
+    double priority_min = 1;
      
     for (auto frame = 0; !ale.game_over(); ++frame, ++total_frames) 
     {    	
@@ -120,14 +122,9 @@ double PlayOneEpisode(ALEInterface& ale, dqn::DQN& dqn, const double epsilon, co
 
 		        priorities.push_back(priority);		        
                 priorities_sum += priority;
+                priority_min = priority < priority_min? priority: priority_min; 
                 double mean = priorities_sum / (priorities.size() * .1);
-                double std2 = 0.0;
-                for (auto p: priorities)
-                {
-                	std2 += (mean - p) * (mean - p); 
-                }
-                std2 /= (priorities.size() * 1.0);
-                threshold = mean - 3 * std2;
+                threshold = mean;
 
                 const auto transition = ale.game_over() ? 
                                             dqn::Transition(input_frames, action, reward, boost::none):
