@@ -130,7 +130,7 @@ double PlayOneEpisode(ALEInterface& ale, dqn::DQN& dqn, const double epsilon, co
                                             dqn::Transition(input_frames, action, reward, boost::none):
                                             dqn::Transition(input_frames, action, reward, next_state);
                 
-                dqn.AddTransition(transition, important_transitions, priority > threshold);
+                dqn.AddTransition(transition, important_transitions, priority >= threshold);
                 
                 // If the size of replay memory is enough, update DQN
                 if (total_frames % update_freq == 0) //> FLAGS_memory_threshold 
