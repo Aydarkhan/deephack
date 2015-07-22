@@ -16,7 +16,7 @@ using std::deque;
 using std::list;
 
 DEFINE_bool(gpu, false, "Use GPU to brew Caffe");
-DEFINE_bool(gui, true, "Open a GUI window");
+DEFINE_bool(gui, false, "Open a GUI window");
 DEFINE_string(rom, "/home/ubuntu/caffe-dqn/dqn-in-the-caffe/games/seaquest.bin", "Atari 2600 ROM to play");
 DEFINE_string(solver, "/home/ubuntu/caffe-dqn/dqn-in-the-caffe/Net/dqn_solver.prototxt", "Solver parameter file (*.prototxt)");
 DEFINE_int32(memory, 500000, "Capacity of replay memory");
@@ -40,6 +40,8 @@ double CalculateEpsilon(const int iter) {
 
 deque<list<dqn::Transition>> important_transitions;
 double threshold = 0.0;
+
+int update_freq = 10000;
 /**
  * Play one episode and return the total score
  */
@@ -52,8 +54,10 @@ double PlayOneEpisode(
     assert(!ale.game_over());
     std::deque<dqn::FrameDataSp> past_frames;
     auto total_score = 0.0;
+
+    int cframe = 0;
   
-    for (auto frame = 0; !ale.game_over(); ++frame) 
+    for (auto frame = 0; !ale.game_over(); ++frame, ++cframe) 
     {
         // TODO std::cout << "frame: " << frame << std::endl;
         const auto current_frame = dqn::PreprocessScreen(ale.getScreen());
@@ -122,10 +126,11 @@ double PlayOneEpisode(
                 dqn.AddTransition(transition, important_transitions, priority > threshold);
                 
                 // If the size of replay memory is enough, update DQN
-                if (important_transitions.size() > FLAGS_memory_threshold) 
-                {
+                if (cframe == update_freq) //> FLAGS_memory_threshold 
+                {                	
                 	//Add improvement here
                     dqn.Update(max_qvalue, important_transitions);                    
+                    cframe = 0;
                 }
             }
         }

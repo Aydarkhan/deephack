@@ -349,41 +349,37 @@ namespace dqn {
     void DQN::AddTransition(const Transition& transition, deque<list<Transition>>& important_transitions, bool has_high_priority) 
     {
         if (important_transitions.size() == replay_memory_capacity_) 
+        { 
+            important_transitions.pop_front();
+        }      
+
+        replay_memory_.push_back(transition);      
+
+        
+        int memory_run = 4;        
+        while (replay_memory_.size() > memory_run) 
         {
-            if (important_transitions.size() > 0 && replay_memory_.front() == important_transitions.front().front()) 
-            {            
-                replay_memory_.pop_front();
-                important_transitions.pop_front();
-            }
-            //We should remove pointer from *important* elements deque 
+            replay_memory_.pop_front();
         }
 
-        replay_memory_.push_back(transition);
-        
         if (has_high_priority) 
         {
             list<Transition> transitions_path;
-            transitions_path.push_back(transition);
 
-            int memory_run = 4;
             int take = 0;
             for (auto it = replay_memory_.rbegin(); it != replay_memory_.rend() && take < memory_run; ++it, ++take) 
             {
                 transitions_path.push_back(*it);
             } 
 
-            while (replay_memory_.size() > memory_run) 
-            {
-                replay_memory_.pop_front();
-            }
-
             important_transitions.push_back(transitions_path);
-        }        
+        }         
+                
     }
 
     void DQN::Update(float& max_qvalue, const deque<list<Transition>>& important_transitions) 
     {
-        std::cout << "iteration: " << current_iter_++ << std::endl;
+        std::cout << "Iteration: " << current_iter_++ << std::endl;
 
         // Sample transitions from replay memory
         int update_batch_size = kMinibatchSize; //(int)important_transitions.size() / 6; //some size variable should be used here
