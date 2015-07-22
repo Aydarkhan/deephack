@@ -1,6 +1,9 @@
 #!/bin/bash
 
 cp CMakeLists.my.txt CMakeLists.txt
+[ -d Net/Snapshot-gopher ] || mkdir Net/Snapshot-gopher
+[ -d Net/Snapshot-seaquest ] || mkdir Net/Snapshot-seaquest
+[ -d Net/Snapshot-tutankham ] || mkdir Net/Snapshot-tutankham
 
 proto_prefix=`pwd`"/Net/"
 gopher=$proto_prefix"dqn_gopher_solver.prototxt"
