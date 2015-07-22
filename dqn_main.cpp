@@ -140,7 +140,7 @@ double PlayOneEpisode(ALEInterface& ale, dqn::DQN& dqn, const double epsilon, co
     std::ofstream out("priorities.txt", std::ofstream::app);
     for (auto val: priorities) 
     {
-        out << val << endl; 
+        out << val << std::endl; 
     }
     
     return total_score;

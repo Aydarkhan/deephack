@@ -572,7 +572,7 @@ namespace dqn {
                 x2 = ((j * x_ratio) >> 16) ;
                 y2 = ((i * y_ratio) >> 16) ;
                 //std::cout << x2 << " " << y2 << "\n";
-                (*screen)[(i * 84) + j] = raw_pixels[(y2*kRawFrameWidth)+x2] ;
+                (*screen)[(i * 84) + j] = PixelToGrayscale(raw_pixels[(y2*kRawFrameWidth)+x2]);
             }
         }
 
@@ -593,7 +593,7 @@ namespace dqn {
                 x2 = ((j * x_ratio) >> 16) ;
                 y2 = ((i * y_ratio) >> 16) ;
                 //std::cout << x2 << " " << y2 << "\n";
-                (*screen)[(i * 84) + j] = raw_pixels[y2][x2] ;
+                (*screen)[(i * 84) + j] = PixelToGrayscale(raw_pixels[y2][x2]);
             }
         }
 
