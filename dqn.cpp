@@ -383,6 +383,7 @@ namespace dqn {
             return;
 	    }
         //std::cout << "Iteration: " << current_iter_++ << std::endl;
+        current_iter_++;
 
         // Sample transitions from replay memory
         int update_batch_size = kMinibatchSize; //(int)important_transitions.size() / 6; //some size variable should be used here

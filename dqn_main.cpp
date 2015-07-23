@@ -21,7 +21,7 @@ DEFINE_bool(gui, false, "Open a GUI window");
 DEFINE_string(rom, "/home/ubuntu/caffe-dqn/dqn-in-the-caffe/games/seaquest.bin", "Atari 2600 ROM to play");
 DEFINE_string(solver, "/home/ubuntu/caffe-dqn/dqn-in-the-caffe/Net/dqn_solver.prototxt", "Solver parameter file (*.prototxt)");
 DEFINE_int32(memory, 500000, "Capacity of replay memory");
-DEFINE_int32(explore, 1000000, "Number of iterations needed for epsilon to reach 0.1");
+DEFINE_int32(explore, 200000, "Number of iterations needed for epsilon to reach 0.1");
 DEFINE_double(gamma, 0.95, "Discount factor of future rewards (0,1]");
 DEFINE_int32(memory_threshold, 100, "Enough amount of transitions to start learning");
 DEFINE_int32(skip_frame, 3, "Number of frames skipped");
