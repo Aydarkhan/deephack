@@ -64,7 +64,7 @@ vector<float> priorities;
 
 double threshold = 0.0;
 
-int update_freq = 10000;
+int update_freq = 10;
 int total_frames = 0;
 /**
  * Play one episode and return the total score
