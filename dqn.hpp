@@ -83,7 +83,7 @@ public:
   /**
    * Update DQN using one minibatch
    */
-  void Update(float& max_qvalue, const deque<list<Transition>>& important_transitions);
+  void Update(const deque<list<Transition>>& important_transitions);
 
   int memory_size() const { return replay_memory_.size(); }
   int current_iteration() const { return current_iter_; }

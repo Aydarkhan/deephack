@@ -376,8 +376,12 @@ namespace dqn {
                 
     }
 
-    void DQN::Update(float& max_qvalue, const deque<list<Transition>>& important_transitions) 
+    void DQN::Update(const deque<list<Transition>>& important_transitions) 
     {
+    	if (important_transitions.size() == 0)
+		{
+            return;
+	    }
         //std::cout << "Iteration: " << current_iter_++ << std::endl;
 
         // Sample transitions from replay memory
@@ -494,36 +498,6 @@ namespace dqn {
             }
             i++;
         }
-
-        //std::cout << "q-values have been updated" << std::endl;
-
-        /*
-        for (auto i = 0; i < kMinibatchSize; ++i) 
-        {
-            const auto& transition = replay_memory_[transitions[i]];
-            const auto action = std::get<1>(transition);
-            assert(static_cast<int>(action) < kOutputCount);
-            const auto reward = std::get<2>(transition);
-            assert(reward >= -1.0 && reward <= 1.0);
-            
-            //HERE
-            const auto target = std::get<3>(transition) ? reward + gamma_ * actions_and_values[target_value_idx++].second : reward;
-
-            assert(!std::isnan(target));
-            target_input[i * kOutputCount + static_cast<int>(action)] = target;
-            filter_input[i * kOutputCount + static_cast<int>(action)] = 1;
-
-            VLOG(1) << "filter:" << action_to_string(action) << " target:" << target;
-            
-            for (auto j = 0; j < kInputFrameCount; ++j) {
-                const auto& frame_data = std::get<0>(transition)[j];
-                std::copy(
-                        frame_data->begin(),
-                        frame_data->end(),
-                        frames_input.begin() + i * kInputDataSize +
-                        j * kCroppedFrameDataSize);
-            }
-        }*/
         
         InputDataIntoLayers(frames_input, target_input, filter_input);
         solver_->Step(1);

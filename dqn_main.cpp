@@ -79,6 +79,8 @@ double PlayOneEpisode(ALEInterface& ale, dqn::DQN& dqn, const double epsilon, co
     double mad = 0.0;
     double priorities_sum = 0.0;
     double priority_min = 1;
+
+    int total_lives = ale.lives();
      
     for (auto frame = 0; !ale.game_over(); ++frame, ++total_frames) 
     {    	
@@ -112,23 +114,28 @@ double PlayOneEpisode(ALEInterface& ale, dqn::DQN& dqn, const double epsilon, co
             const auto action = dqn.SelectAction(input_frames, epsilon, max_qvalue);
             
             auto immediate_score = 0.0;
+
             for (auto i = 0; i < FLAGS_skip_frame + 1 && !ale.game_over(); ++i) 
             {
                 // Last action is repeated on skipped frames
                 immediate_score += ale.act(action);
             }
-            
+
             float reward=0.0;
 
-            if(immediate_score>0.0)
+            if (immediate_score>0.0)
             {
-                reward=normalize_reward(immediate_score);
+                reward = normalize_reward(immediate_score);
                 std::cout<<" total_score: " << total_score << " immediate_score:" << immediate_score << " normalized_reward: " << reward << std::endl;
             }
             else
             {
                 reward = immediate_score == 0 ? 0 : immediate_score /= std::abs(immediate_score);
             }
+
+            int current_lives = ale.lives();
+            immediate_score = current_lives - total_lives;
+            total_lives = current_lives; 
             
             total_score += immediate_score;
 
@@ -144,12 +151,12 @@ double PlayOneEpisode(ALEInterface& ale, dqn::DQN& dqn, const double epsilon, co
 
                 std::vector<dqn::InputFrames> inputFramesVect;
                 inputFramesVect.push_back(input_frames);
-		        const std::vector<std::pair<Action, float>> actions_and_values = dqn.SelectActionGreedily(inputFramesVect);
+    		        const std::vector<std::pair<Action, float>> actions_and_values = dqn.SelectActionGreedily(inputFramesVect);
 
-		        float predicted_qvalue = actions_and_values.front().second;
-		        float priority = fabs(reward + FLAGS_gamma * predicted_qvalue - max_qvalue);
+    		        float predicted_qvalue = actions_and_values.front().second;
+    		        float priority = fabs(reward + FLAGS_gamma * predicted_qvalue - max_qvalue);
 
-		        priorities.push_back(priority);		        
+    		        priorities.push_back(priority);		        
                 priorities_sum += priority;
                 priority_min = priority < priority_min? priority: priority_min; 
                 double mean = priorities_sum / (priorities.size() * .1);
@@ -166,7 +173,7 @@ double PlayOneEpisode(ALEInterface& ale, dqn::DQN& dqn, const double epsilon, co
                 if (total_frames % update_freq == 0 and total_frames > 10000) //> FLAGS_memory_threshold 
                 {                	
                 	//Add improvement here
-                    dqn.Update(max_qvalue, important_transitions);
+                    dqn.Update(important_transitions);
                 }
                 //std::cout << important_transitions.size()  << std::endl;
             }

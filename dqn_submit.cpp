@@ -53,7 +53,7 @@ bool read_screen(std::vector<std::vector<unsigned char>> &raw_screen){
   for (int i = 0; i < 210; ++i) {
       for (int j = 0; j < 160; ++j) {
 
-          fscanf(stdin, "%c%c", &a, &b);
+          int scan_res = fscanf(stdin, "%c%c", &a, &b);
           if (b == 'I') { // DIE
               term = true;
               break;
@@ -65,9 +65,9 @@ bool read_screen(std::vector<std::vector<unsigned char>> &raw_screen){
 
 
   char temp;
-  fscanf(stdin, "%c", &temp); // :
-  fscanf(stdin, "%c", &terminate);
-  fscanf(stdin, "%c", &temp); // :
+  int scan_res = fscanf(stdin, "%c", &temp); // :
+  scan_res = fscanf(stdin, "%c", &terminate);
+  scan_res = fscanf(stdin, "%c", &temp); // :
   std::cin.get(reward, 9, ':');
   if (reward[0] != '0') {
     std::cerr << zero_count << " zeros\n" << reward << std::endl;
