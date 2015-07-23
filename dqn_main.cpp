@@ -175,11 +175,11 @@ double PlayOneEpisode(ALEInterface& ale, dqn::DQN& dqn, const double epsilon, co
 
     ale.reset_game();
     
-    std::ofstream out("priorities.txt", std::ofstream::app);
-    for (auto val: priorities) 
-    {
-        out << val << std::endl; 
-    }
+    // std::ofstream out("priorities.txt", std::ofstream::app);
+    // for (auto val: priorities) 
+    // {
+    //     out << val << std::endl; 
+    // }
     
     return total_score;
 }
