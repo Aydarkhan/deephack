@@ -62,7 +62,7 @@ float normalize_reward(float rew)
 deque<list<dqn::Transition>> important_transitions;
 vector<float> priorities;
 
-double threshold = 0.5;
+double threshold = 0;
 
 int update_freq = 4;
 int total_frames = 0;
@@ -236,7 +236,7 @@ int main(int argc, char** argv)
 
   
   double epsilon_value = 0.95;
-  
+
   for (auto episode = 0;; episode++) 
   {
     // std::mt19937 random_engine;
@@ -250,7 +250,8 @@ int main(int argc, char** argv)
     // TODO std::cout << "episode: " << episode << std::endl;
     const auto epsilon = CalculateEpsilon(dqn.current_iteration());
     PlayOneEpisode(ale, dqn, epsilon, true);
-    if (dqn.current_iteration() % 10 == 0) {
+    if (dqn.current_iteration() % 10 == 0) 
+    {
       // After every 10 episodes, evaluate the current strength      
       const auto eval_score = PlayOneEpisode(ale, dqn, epsilon_value, false);
       
