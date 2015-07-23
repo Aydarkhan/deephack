@@ -1,4 +1,4 @@
-ROOT="/home/ubuntu/caffe-dqn/dqn-in-the-caffe"
+ROOT=`pwd`
 GAME="seaquest"
 
 NEWEST=$(ls -t Net/Snapshot-${GAME}/ | grep -v .cumulated | head -n 1 | grep -o "[0-9]*")
@@ -18,6 +18,5 @@ mv Net/Snapshot-"$GAME"/"$GAME"_iter_"${NEWEST}".caffemodel  Net/Snapshot-"$GAME
 fi
 
 export OPENBLAS_NUM_THREADS=32
-./build/dqn -solver=$ROOT"/Net/dqn_"$GAME"_solver.prototxt" -rom=$ROOT"/games/"$GAME".bin" -model=$ROOT"/Net/Snapshot-"$GAME"/"$GAME"_iter_"$ITER".caffemodel.cumulated"
-
+CUDA_VISIBLE_DEVICES=2 ./build/dqn -solver=$ROOT"/Net/dqn_"$GAME"_solver.prototxt" -rom=$ROOT"/games/"$GAME".bin" -model=$ROOT"/Net/Snapshot-"$GAME"/"$GAME"_iter_"$ITER".caffemodel.cumulated" -gpu
 
