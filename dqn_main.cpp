@@ -165,6 +165,7 @@ double PlayOneEpisode(ALEInterface& ale, dqn::DQN& dqn, const double epsilon, co
                 
                 if (priorities.size() > 1000)
                 {
+                    priorities_sum -= priorities.front();
                     priorities.pop_front();
                     priorities.push_back(priority);           
                     priorities_sum += priority;                
