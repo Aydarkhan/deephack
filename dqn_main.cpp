@@ -234,13 +234,24 @@ int main(int argc, char** argv)
     return 0;
   }
 
-  for (auto episode = 0;; episode++) {
+  
+  double epsilon_values[] = {0.1, 0.2, 0.3, 0.4, 0.5, 0.6, 0.7, 0.8, 0.9, 0.95};
+
+  for (auto episode = 0;; episode++) 
+  {
+    std::mt19937 random_engine;
+    int epsilon_value_ind = std::uniform_int_distribution<int>(0, 9)(random_engine);
+    double epsilon_value = epsilon_values[epsilon_value_ind];
+
     // TODO std::cout << "episode: " << episode << std::endl;
     const auto epsilon = CalculateEpsilon(dqn.current_iteration());
     PlayOneEpisode(ale, dqn, epsilon, true);
     if (dqn.current_iteration() % 10 == 0) {
-      // After every 10 episodes, evaluate the current strength
-      const auto eval_score = PlayOneEpisode(ale, dqn, 0.05, false);
+      // After every 10 episodes, evaluate the current strength      
+      const auto eval_score = PlayOneEpisode(ale, dqn, epsilon_value, false);
+      // epsilon_value -= 0.05;
+      // epsilon_value *= 0.9;
+      // epsilon_value += 0.05;
       // TODO std::cout << "evaluation score: " << eval_score << std::endl;
     }
   }
