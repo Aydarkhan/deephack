@@ -1,14 +1,15 @@
 cmake_minimum_required (VERSION 2.6)
 project(dqn)
 
-option(CPU_ONLY "Use CPU only for Caffe" ON)
+option(CPU_ONLY "Use CPU only for Caffe" OFF)
 option(USE_CUDNN "Use cuDNN for Caffe" OFF)
 option(USE_SDL "Use SDL for ALE" ON)
 
-include_directories(~/Documents/projects/deephack/caffe-dqn/include)
-include_directories(~/Documents/projects/deephack/Arcade-Learning-Environment/src)
-link_directories(~/Documents/projects/deephack/caffe-dqn/build/lib)
-link_directories(~/Documents/projects/deephack/Arcade-Learning-Environment/)
+include_directories(~/caffe-dqn/caffe/include/)
+include_directories(~/caffe-dqn/ALE/src)
+link_directories(~/caffe-dqn/caffe/build/lib)
+link_directories(~/caffe-dqn/ALE/)
+
 link_directories(/usr/local/lib/)
 
 
@@ -96,7 +97,7 @@ if(USE_SDL)
 endif()
 
 if(NOT CPU_ONLY)
-  include_directories(/usr/local/cuda-6.5/targets/x86_64-linux/include)
+  include_directories(/usr/local/cuda-6.5/include)
 endif()
 
 if(CPU_ONLY)
