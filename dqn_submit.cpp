@@ -182,7 +182,7 @@ int main(int argc, char** argv) {
 
       //std::cout << "Term " << term << std::endl;
 
-      // TODO std::cout << "frame: " << frame << std::endl;
+      if (frame % 3600 == 0) std::cerr << "frame: " << frame << std::endl;
       current_frame = dqn::PreprocessArrayScreenImproved(raw_screen);
       past_frames.push_back(current_frame);
       past_frames.pop_front();

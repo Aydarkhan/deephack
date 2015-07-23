@@ -21,7 +21,7 @@ DEFINE_bool(gui, false, "Open a GUI window");
 DEFINE_string(rom, "/home/ubuntu/caffe-dqn/dqn-in-the-caffe/games/seaquest.bin", "Atari 2600 ROM to play");
 DEFINE_string(solver, "/home/ubuntu/caffe-dqn/dqn-in-the-caffe/Net/dqn_solver.prototxt", "Solver parameter file (*.prototxt)");
 DEFINE_int32(memory, 500000, "Capacity of replay memory");
-DEFINE_int32(explore, 1000000, "Number of iterations needed for epsilon to reach 0.1");
+DEFINE_int32(explore, 200000, "Number of iterations needed for epsilon to reach 0.1");
 DEFINE_double(gamma, 0.95, "Discount factor of future rewards (0,1]");
 DEFINE_int32(memory_threshold, 100, "Enough amount of transitions to start learning");
 DEFINE_int32(skip_frame, 3, "Number of frames skipped");
@@ -84,7 +84,7 @@ double PlayOneEpisode(ALEInterface& ale, dqn::DQN& dqn, const double epsilon, co
      
     for (auto frame = 0; !ale.game_over(); ++frame, ++total_frames) 
     {    	
-        //std::cout << "frame: " << frame << std::endl;
+        if (total_frames % 600 == 0) std::cout << "frame: " << total_frames << std::endl;
         const auto current_frame = dqn::PreprocessScreenImproved(ale.getScreen());
         if (FLAGS_show_frame) 
         {
@@ -134,8 +134,15 @@ double PlayOneEpisode(ALEInterface& ale, dqn::DQN& dqn, const double epsilon, co
             }
 
             int current_lives = ale.lives();
-            immediate_score = current_lives - total_lives;
-            total_lives = current_lives; 
+            int diff_lives =current_lives - total_lives;
+            total_lives = current_lives;
+
+            if (diff_lives != 0)
+            {
+                std::cout << "diff_lives = " << diff_lives << std::endl;
+                reward = diff_lives;
+             }
+   
             
             total_score += immediate_score;
 
@@ -160,7 +167,7 @@ double PlayOneEpisode(ALEInterface& ale, dqn::DQN& dqn, const double epsilon, co
                 priorities_sum += priority;
                 priority_min = priority < priority_min? priority: priority_min; 
                 double mean = priorities_sum / (priorities.size() * .1);
-                threshold *= 0.999;
+                threshold *= 0.99;
                 //std::cout << threshold << std::endl;
 
                 const auto transition = ale.game_over() ? 
