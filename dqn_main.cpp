@@ -154,7 +154,7 @@ double PlayOneEpisode(ALEInterface& ale, dqn::DQN& dqn, const double epsilon, co
                 priority_min = priority < priority_min? priority: priority_min; 
                 double mean = priorities_sum / (priorities.size() * .1);
                 threshold = mean;
-                std::cout << threshold << std::endl;
+                //std::cout << threshold << std::endl;
 
                 const auto transition = ale.game_over() ? 
                                             dqn::Transition(input_frames, action, reward, boost::none):

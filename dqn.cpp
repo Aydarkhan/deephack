@@ -378,7 +378,7 @@ namespace dqn {
 
     void DQN::Update(float& max_qvalue, const deque<list<Transition>>& important_transitions) 
     {
-        std::cout << "Iteration: " << current_iter_++ << std::endl;
+        //std::cout << "Iteration: " << current_iter_++ << std::endl;
 
         // Sample transitions from replay memory
         int update_batch_size = kMinibatchSize; //(int)important_transitions.size() / 6; //some size variable should be used here
