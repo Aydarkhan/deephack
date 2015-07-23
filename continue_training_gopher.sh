@@ -18,4 +18,4 @@ mv Net/Snapshot-"$GAME"/"$GAME"_iter_"${NEWEST}".caffemodel  Net/Snapshot-"$GAME
 fi
 
 export OPENBLAS_NUM_THREADS=32
-CUDA_VISIBLE_DEVICE=1 ./build/dqn -solver=$ROOT"/Net/dqn_"$GAME"_solver.prototxt" -rom=$ROOT"/games/"$GAME".bin" -model=$ROOT"/Net/Snapshot-"$GAME"/"$GAME"_iter_"$ITER".caffemodel" -gpu
+CUDA_VISIBLE_DEVICES=1 ./build/dqn -solver=$ROOT"/Net/dqn_"$GAME"_solver.prototxt" -rom=$ROOT"/games/"$GAME".bin" -model=$ROOT"/Net/Snapshot-"$GAME"/"$GAME"_iter_"$ITER".caffemodel" -gpu=true

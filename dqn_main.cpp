@@ -82,7 +82,7 @@ double PlayOneEpisode(ALEInterface& ale, dqn::DQN& dqn, const double epsilon, co
      
     for (auto frame = 0; !ale.game_over(); ++frame, ++total_frames) 
     {    	
-        //std::cout << "frame: " << frame << std::endl;
+        if (total_frames % 600 == 0) std::cout << "frame: " << total_frames << std::endl;
         const auto current_frame = dqn::PreprocessScreenImproved(ale.getScreen());
         if (FLAGS_show_frame) 
         {
