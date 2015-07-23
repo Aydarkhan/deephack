@@ -1,4 +1,4 @@
-ROOT="/home/ubuntu/caffe-dqn/dqn-in-the-caffe"
+ROOT=`pwd`
 GAME="gopher"
 
 NEWEST=$(ls -t Net/Snapshot-${GAME}/ | grep -v .cumulated | head -n 1 | grep -o "[0-9]*")

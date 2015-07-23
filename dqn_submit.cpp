@@ -39,6 +39,8 @@ unsigned char hex(char x) {
   }
 }
 
+int zero_count = 0;
+int total_score = 0;
 
 bool read_screen(std::vector<std::vector<unsigned char>> &raw_screen){
 
@@ -67,7 +69,13 @@ bool read_screen(std::vector<std::vector<unsigned char>> &raw_screen){
   fscanf(stdin, "%c", &terminate);
   fscanf(stdin, "%c", &temp); // :
   std::cin.get(reward, 9, ':');
-  std::cerr << reward << std::endl;
+  if (reward[0] != '0') {
+    std::cerr << zero_count << " zeros\n" << reward << std::endl;
+    zero_count = 0;
+    total_score += atoi(reward);
+  } else {
+    zero_count++;
+  }
   if (terminate == '1') {
       term = true;
   }
@@ -155,7 +163,7 @@ int main(int argc, char** argv) {
   for (; frame < 4; ++frame){
       term = read_screen(raw_screen);
       if (term)
-          return 0;
+          goto konec;
 
       //std::cout << "Term " << term << std::endl;
 
@@ -170,7 +178,7 @@ int main(int argc, char** argv) {
 
       term = read_screen(raw_screen);
       if (term)
-          return 0;
+          goto konec;
 
       //std::cout << "Term " << term << std::endl;
 
@@ -190,12 +198,14 @@ int main(int argc, char** argv) {
           term = read_screen(raw_screen);
           //std::cout << "Term " << term << std::endl;
           if (term)
-              return 0;
+              goto konec;
       }
       make_action(ale, action);
       
   }
   //out.close();
 
+  konec:
+  std::cerr << "total score: " << total_score << std::endl;
   return 0;
 }
