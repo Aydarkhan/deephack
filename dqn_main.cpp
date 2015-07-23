@@ -163,17 +163,20 @@ double PlayOneEpisode(ALEInterface& ale, dqn::DQN& dqn, const double epsilon, co
     		        float predicted_qvalue = actions_and_values.front().second;
     		        float priority = fabs(reward + FLAGS_gamma * predicted_qvalue - max_qvalue);
                 
-                if (priorities.size() > 10000)
+                if (priorities.size() > 1000)
                 {
                     priorities.pop_front();
-                }
-                
-    		        priorities.push_back(priority);		        
-                priorities_sum += priority;                
-                double mean = priorities_sum / (priorities.size() * .1);
-                threshold = mean;              
+                    priorities.push_back(priority);           
+                    priorities_sum += priority;                
+                    double mean = priorities_sum / (priorities.size() * .1);
+                    threshold = mean;
+                } 
+                else
+                {
+                    threshold = 0.0;
+                }  
+                    		                      
                 //std::cout << threshold << std::endl;
-
                 const auto transition = ale.game_over() ? 
                                             dqn::Transition(input_frames, action, reward, boost::none):
                                             dqn::Transition(input_frames, action, reward, next_state);
