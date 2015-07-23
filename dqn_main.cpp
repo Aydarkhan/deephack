@@ -139,6 +139,7 @@ double PlayOneEpisode(ALEInterface& ale, dqn::DQN& dqn, const double epsilon, co
 
             if (diff_lives != 0)
             {
+                std::cout << "diff_lives = " << diff_lives << std::endl;
                 reward = diff_lives;
              }
    
