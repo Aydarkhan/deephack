@@ -134,8 +134,14 @@ double PlayOneEpisode(ALEInterface& ale, dqn::DQN& dqn, const double epsilon, co
             }
 
             int current_lives = ale.lives();
-            immediate_score = current_lives - total_lives;
-            total_lives = current_lives; 
+            int diff_lives =current_lives - total_lives;
+            total_lives = current_lives;
+
+            if (diff_lives != 0)
+            {
+                reward = diff_lives;
+             }
+   
             
             total_score += immediate_score;
 
@@ -160,7 +166,7 @@ double PlayOneEpisode(ALEInterface& ale, dqn::DQN& dqn, const double epsilon, co
                 priorities_sum += priority;
                 priority_min = priority < priority_min? priority: priority_min; 
                 double mean = priorities_sum / (priorities.size() * .1);
-                threshold *= 0.999;
+                threshold *= 0.99;
                 //std::cout << threshold << std::endl;
 
                 const auto transition = ale.game_over() ? 
@@ -170,7 +176,7 @@ double PlayOneEpisode(ALEInterface& ale, dqn::DQN& dqn, const double epsilon, co
                 dqn.AddTransition(transition, important_transitions, priority >= threshold);
                 
                 // If the size of replay memory is enough, update DQN
-                if (total_frames % update_freq == 0 and total_frames > 10000) //> FLAGS_memory_threshold 
+                if (total_frames % update_freq == 0) //> FLAGS_memory_threshold 
                 {                	
                 	//Add improvement here
                     dqn.Update(important_transitions);
