@@ -62,9 +62,9 @@ float normalize_reward(float rew)
 deque<list<dqn::Transition>> important_transitions;
 vector<float> priorities;
 
-double threshold = 0.0;
+double threshold = 0.5;
 
-int update_freq = 10;
+int update_freq = 4;
 int total_frames = 0;
 /**
  * Play one episode and return the total score
@@ -160,7 +160,7 @@ double PlayOneEpisode(ALEInterface& ale, dqn::DQN& dqn, const double epsilon, co
                 priorities_sum += priority;
                 priority_min = priority < priority_min? priority: priority_min; 
                 double mean = priorities_sum / (priorities.size() * .1);
-                threshold = mean;
+                threshold *= 0.999;
                 //std::cout << threshold << std::endl;
 
                 const auto transition = ale.game_over() ? 
