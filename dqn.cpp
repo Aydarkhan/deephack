@@ -355,7 +355,7 @@ namespace dqn {
         replay_memory_.push_back(transition);      
 
         
-        int memory_run = 4;        
+        int memory_run = 20;        
         while (replay_memory_.size() > memory_run) 
         {
             replay_memory_.pop_front();
