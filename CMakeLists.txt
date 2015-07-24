@@ -5,12 +5,6 @@ option(CPU_ONLY "Use CPU only for Caffe" OFF)
 option(USE_CUDNN "Use cuDNN for Caffe" OFF)
 option(USE_SDL "Use SDL for ALE" ON)
 
-<<<<<<< HEAD
-include_directories(~/Programs/CaffeDQN/caffe/include)
-include_directories(~/Programs/ALE/src)
-link_directories(~/Programs/CaffeDQN/caffe/build/lib)
-link_directories(~/Programs/ALE)
-=======
 include_directories(~/caffe-dqn/caffe/include/)
 include_directories(~/caffe-dqn/ALE/src)
 link_directories(~/caffe-dqn/caffe/build/lib)
@@ -18,7 +12,6 @@ link_directories(~/caffe-dqn/ALE/)
 
 link_directories(/usr/local/lib/)
 
->>>>>>> 2a94bc1463405c8a56f9083c714c11dea3c4a9ef
 
 #include_directories(/opt/OpenBLAS/include)
 
@@ -28,6 +21,8 @@ endif()
 
 add_executable(dqn dqn_main.cpp dqn.cpp)
 add_executable(dqn_submit dqn.cpp dqn_submit.cpp)
+#add_executable(dqn_seaquest dqn.cpp dqn_main_seaquest_submit.cpp)
+#add_executable(dqn_tutankham dqn.cpp dqn_main_tutankham_submit.cpp)
 
 set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -std=c++11 -O3 -march=native")
 
@@ -41,6 +36,15 @@ target_link_libraries(dqn_submit glog)
 target_link_libraries(dqn_submit gflags)
 target_link_libraries(dqn_submit ale)
 
+#target_link_libraries(dqn_seaquest caffe)
+#target_link_libraries(dqn_seaquest glog)
+#target_link_libraries(dqn_seaquest gflags)
+#target_link_libraries(dqn_seaquest ale)
+
+#target_link_libraries(dqn_tutankham caffe)
+#target_link_libraries(dqn_tutankham glog)
+#target_link_libraries(dqn_tutankham gflags)
+#target_link_libraries(dqn_tutankham ale)
 
 if(APPLE)
   include_directories(/System/Library/Frameworks/vecLib.framework/Versions/Current/Headers)
@@ -59,6 +63,16 @@ if(USE_SDL)
     target_link_libraries(dqn_submit sdl_gfx)
     target_link_libraries(dqn_submit sdl_image)
     target_link_libraries(dqn_submit sdlmain)
+
+    #target_link_libraries(dqn_seaquest sdl)
+    #target_link_libraries(dqn_seaquest sdl_gfx)
+    #target_link_libraries(dqn_seaquest sdl_image)
+    #target_link_libraries(dqn_seaquest sdlmain)
+
+    #target_link_libraries(dqn_tutankham sdl)
+    #target_link_libraries(dqn_tutankham sdl_gfx)
+    #target_link_libraries(dqn_tutankham sdl_image)
+    #target_link_libraries(dqn_tutankham sdlmain)
   else()
     target_link_libraries(dqn SDL)
     target_link_libraries(dqn SDL_gfx)
@@ -70,6 +84,15 @@ if(USE_SDL)
     target_link_libraries(dqn_submit SDL_image)
     target_link_libraries(dqn_submit SDLmain)
 
+    #target_link_libraries(dqn_seaquest SDL)
+    #target_link_libraries(dqn_seaquest SDL_gfx)
+    #target_link_libraries(dqn_seaquest SDL_image)
+    #target_link_libraries(dqn_seaquest SDLmain)
+
+    #target_link_libraries(dqn_tutankham SDL)
+    #target_link_libraries(dqn_tutankham SDL_gfx)
+    #target_link_libraries(dqn_tutankham SDL_image)
+    #target_link_libraries(dqn_tutankham SDLmain)
   endif()
 endif()
 
@@ -84,5 +107,7 @@ endif()
 if(USE_CUDNN)
   target_link_libraries(dqn cudnn)
   target_link_libraries(dqn_submit cudnn)
+  #target_link_libraries(dqn_seaquest cudnn)
+  #target_link_libraries(dqn_tutankham cudnn)
 endif()
 
