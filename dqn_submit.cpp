@@ -151,7 +151,6 @@ int main(int argc, char** argv) {
 //  return 0;
 
   std::deque<dqn::FrameDataSp> past_frames;
-  auto total_score = 0.0;
   dqn::FrameDataSp current_frame;
   std::vector<std::vector<unsigned char>> raw_screen(210, std::vector<unsigned char>(160));
 
@@ -182,7 +181,7 @@ int main(int argc, char** argv) {
 
       //std::cout << "Term " << term << std::endl;
 
-      if (frame % 3600 == 0) std::cerr << "frame: " << frame << std::endl;
+      if (frame % 500 == 0) std::cerr << "frame: " << frame << std::endl;
       current_frame = dqn::PreprocessArrayScreenImproved(raw_screen);
       past_frames.push_back(current_frame);
       past_frames.pop_front();
