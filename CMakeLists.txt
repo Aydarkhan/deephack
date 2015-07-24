@@ -1,14 +1,24 @@
 cmake_minimum_required (VERSION 2.6)
 project(dqn)
 
-option(CPU_ONLY "Use CPU only for Caffe" ON)
+option(CPU_ONLY "Use CPU only for Caffe" OFF)
 option(USE_CUDNN "Use cuDNN for Caffe" OFF)
 option(USE_SDL "Use SDL for ALE" ON)
 
+<<<<<<< HEAD
 include_directories(~/Programs/CaffeDQN/caffe/include)
 include_directories(~/Programs/ALE/src)
 link_directories(~/Programs/CaffeDQN/caffe/build/lib)
 link_directories(~/Programs/ALE)
+=======
+include_directories(~/caffe-dqn/caffe/include/)
+include_directories(~/caffe-dqn/ALE/src)
+link_directories(~/caffe-dqn/caffe/build/lib)
+link_directories(~/caffe-dqn/ALE/)
+
+link_directories(/usr/local/lib/)
+
+>>>>>>> 2a94bc1463405c8a56f9083c714c11dea3c4a9ef
 
 #include_directories(/opt/OpenBLAS/include)
 
@@ -64,7 +74,7 @@ if(USE_SDL)
 endif()
 
 if(NOT CPU_ONLY)
-  include_directories(/usr/local/cuda-6.5/targets/x86_64-linux/include)
+  include_directories(/usr/local/cuda-6.5/include)
 endif()
 
 if(CPU_ONLY)

@@ -21,7 +21,7 @@ DEFINE_bool(gui, false, "Open a GUI window");
 DEFINE_string(rom, "/home/ubuntu/caffe-dqn/dqn-in-the-caffe/games/seaquest.bin", "Atari 2600 ROM to play");
 DEFINE_string(solver, "/home/ubuntu/caffe-dqn/dqn-in-the-caffe/Net/dqn_solver.prototxt", "Solver parameter file (*.prototxt)");
 DEFINE_int32(memory, 500000, "Capacity of replay memory");
-DEFINE_int32(explore, 1000000, "Number of iterations needed for epsilon to reach 0.1");
+DEFINE_int32(explore, 200000, "Number of iterations needed for epsilon to reach 0.1");
 DEFINE_double(gamma, 0.95, "Discount factor of future rewards (0,1]");
 DEFINE_int32(memory_threshold, 100, "Enough amount of transitions to start learning");
 DEFINE_int32(skip_frame, 3, "Number of frames skipped");
@@ -60,9 +60,9 @@ float normalize_reward(float rew)
 
 
 deque<list<dqn::Transition>> important_transitions;
-vector<float> priorities;
+deque<float> priorities;
 
-double threshold = 0.5;
+double threshold = 0;
 
 int update_freq = 4;
 int total_frames = 0;
@@ -86,6 +86,7 @@ double PlayOneEpisode(ALEInterface& ale, dqn::DQN& dqn, const double epsilon, co
     {    	
         //std::cout << "frame: " << frame << std::endl;
         const auto current_frame = dqn::PreprocessScreen(ale.getScreen());
+
         if (FLAGS_show_frame) 
         {
             std::cout << dqn::DrawFrame(*current_frame) << std::endl;
@@ -134,8 +135,15 @@ double PlayOneEpisode(ALEInterface& ale, dqn::DQN& dqn, const double epsilon, co
             }
 
             int current_lives = ale.lives();
-            immediate_score = current_lives - total_lives;
-            total_lives = current_lives; 
+            int diff_lives =current_lives - total_lives;
+            total_lives = current_lives;
+
+            if (diff_lives != 0)
+            {
+                std::cout << "diff_lives = " << diff_lives << std::endl;
+                reward = diff_lives;
+             }
+   
             
             total_score += immediate_score;
 
@@ -156,13 +164,22 @@ double PlayOneEpisode(ALEInterface& ale, dqn::DQN& dqn, const double epsilon, co
     		        float predicted_qvalue = actions_and_values.front().second;
     		        float priority = fabs(reward + FLAGS_gamma * predicted_qvalue - max_qvalue);
 
-    		        priorities.push_back(priority);		        
-                priorities_sum += priority;
-                priority_min = priority < priority_min? priority: priority_min; 
-                double mean = priorities_sum / (priorities.size() * .1);
-                threshold *= 0.999;
-                //std::cout << threshold << std::endl;
+                priorities.push_back(priority);
+                priorities_sum += priority; 
 
+                if (priorities.size() > 1000)
+                {
+                    priorities_sum -= priorities.front();                    
+                    priorities.pop_front();
+                    double mean = priorities_sum / (priorities.size() * .1);
+                    threshold = mean;                    
+                } 
+                else
+                {
+                    threshold = 0.0;
+                }  
+
+                //std::cout << threshold << std::endl;
                 const auto transition = ale.game_over() ? 
                                             dqn::Transition(input_frames, action, reward, boost::none):
                                             dqn::Transition(input_frames, action, reward, next_state);
@@ -236,7 +253,7 @@ int main(int argc, char** argv)
 
   
   double epsilon_value = 0.95;
-  
+
   for (auto episode = 0;; episode++) 
   {
     // std::mt19937 random_engine;
@@ -250,7 +267,8 @@ int main(int argc, char** argv)
     // TODO std::cout << "episode: " << episode << std::endl;
     const auto epsilon = CalculateEpsilon(dqn.current_iteration());
     PlayOneEpisode(ale, dqn, epsilon, true);
-    if (dqn.current_iteration() % 10 == 0) {
+    if (dqn.current_iteration() % 10 == 0) 
+    {
       // After every 10 episodes, evaluate the current strength      
       const auto eval_score = PlayOneEpisode(ale, dqn, epsilon_value, false);
       
