@@ -164,27 +164,12 @@ double PlayOneEpisode(ALEInterface& ale, dqn::DQN& dqn, const double epsilon, co
     		        float predicted_qvalue = actions_and_values.front().second;
     		        float priority = fabs(reward + FLAGS_gamma * predicted_qvalue - max_qvalue);
 
-                priorities.push_back(priority);
-                priorities_sum += priority; 
-
-                if (priorities.size() > 1000)
-                {
-                    priorities_sum -= priorities.front();                    
-                    priorities.pop_front();
-                    double mean = priorities_sum / (priorities.size() * .1);
-                    threshold = mean;                    
-                } 
-                else
-                {
-                    threshold = 0.0;
-                }  
-
                 //std::cout << threshold << std::endl;
                 const auto transition = ale.game_over() ? 
                                             dqn::Transition(input_frames, action, reward, boost::none):
                                             dqn::Transition(input_frames, action, reward, next_state);
                 
-                dqn.AddTransition(transition, important_transitions, priority >= threshold);
+                dqn.AddTransition(transition, important_transitions, true);
                 
                 // If the size of replay memory is enough, update DQN
                 if (total_frames % update_freq == 0) //> FLAGS_memory_threshold 
