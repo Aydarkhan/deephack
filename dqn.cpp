@@ -81,6 +81,7 @@ namespace dqn {
         std::cout << std::endl;
          */
 
+
         assert(raw_pixels[0].size() == kRawFrameWidth);
         assert(raw_pixels.size() == kRawFrameHeight);
         auto screen = std::make_shared<FrameData>();
@@ -94,8 +95,6 @@ namespace dqn {
                 auto last_x = static_cast<int>(std::floor((j + 1) * x_ratio));
                 auto first_y = static_cast<int>(std::floor(i * y_ratio));
                 auto last_y = static_cast<int>(std::floor((i + 1) * y_ratio));
-                if (last_x == kRawFrameWidth) --last_x;
-                if (last_y == kRawFrameHeight) --last_y;
 
                 auto x_sum = 0.0;
                 auto y_sum = 0.0;
@@ -121,9 +120,11 @@ namespace dqn {
                                 y_ratio_in_resulting_pixel >= 0.0 &&
                                 y_ratio_in_resulting_pixel <= 1.0);
                         // out << "x = " << x << ", y = " << y << "\n";
+                        
                         const auto grayscale =
                                 PixelToGrayscale(
-                                        raw_pixels[static_cast<int>(y)][static_cast<int>(x)]);
+                                        raw_pixels[static_cast<int>(y >= kRawFrameHeight ? kRawFrameHeight - 1 : y)]
+                                        [static_cast<int>(x >= kRawFrameWidth ? kRawFrameWidth - 1 : x)]);
                         resulting_color +=
                                 (x_ratio_in_resulting_pixel / x_ratio) *
                                 (y_ratio_in_resulting_pixel / y_ratio) * grayscale;
@@ -172,9 +173,11 @@ namespace dqn {
                         assert(
                                 y_ratio_in_resulting_pixel >= 0.0 &&
                                 y_ratio_in_resulting_pixel <= 1.0);
+
                         const auto grayscale =
                                 PixelToGrayscale(
-                                        raw_pixels[static_cast<int>(y * kRawFrameWidth + x)]);
+                                        raw_pixels[static_cast<int>((y >= kRawFrameHeight ? kRawFrameHeight - 1 : y) 
+                                            * kRawFrameWidth + ((x >= kRawFrameWidth ? kRawFrameWidth - 1 : x)))]);
                         resulting_color +=
                                 (x_ratio_in_resulting_pixel / x_ratio) *
                                 (y_ratio_in_resulting_pixel / y_ratio) * grayscale;
@@ -185,6 +188,7 @@ namespace dqn {
         }
         return screen;
     }
+    
 
     std::string DrawFrame(const FrameData& frame) {
         std::ostringstream o;
